@@ -13,6 +13,7 @@ endif
 syn keyword 	snlType		kpt topic
 syn keyword	snlProperty	what when how
 syn keyword	snlConnect	of compares ref
+syn keyword	snlStatement	has which
 
 syn match	snlNum		'\d\*\.\d\+'
 syn match	snlNum		'[-+]\d\*\.\d\+'
@@ -41,7 +42,8 @@ hi def link	snlType		Type
 hi def link	snlNum		Number
 hi def link	snlStr		String
 hi def link	snlRawStr	String
-hi def link	snlConnect	Label
-hi def link	snlProperty	Label
+hi def link	snlConnect	Statement
+hi def link	snlStatement	Statement
+hi def link	snlProperty	function
 hi def link	snlEscape	Special
 

@@ -11,8 +11,8 @@ endif
 
 " Basic Keywords
 syn keyword 	snlType		kpt topic
-syn keyword	snlProperty	what when how
-syn keyword	snlConnect	of compares ref
+syn keyword	snlProperty	what when how why
+syn keyword	snlConnect	of compares ref AKA
 syn keyword	snlStatement	has which
 
 syn match	snlNum		'\d\*\.\d\+'

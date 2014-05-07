@@ -10,8 +10,8 @@ if exists("b:current_syntax")
 endif
 
 " Basic Keywords
-syn keyword 	snlType		kpt topic
-syn keyword	snlProperty	what when how why
+syn keyword 	snlType		kpt topic proc
+syn keyword	snlProperty	what when how why relation
 syn keyword	snlConnect	of compares ref AKA
 syn keyword	snlStatement	has which
 
@@ -33,7 +33,7 @@ syn region  	snlRawStr
       \ start=+[uU]\=[rR]\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
       \ contains=@Spell
 
-syn match	snlEscape	+\\[abfnrtv'"\\]+ contained
+syn match	snlEscape	+\\[abfnrtv'"\\\$]+ contained
 
 let b:current_syntax='snl'
 hi def link	snlTodo		Todo

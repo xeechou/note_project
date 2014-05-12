@@ -40,9 +40,13 @@ WHAT_REG		what
 WHEN_REG		when
 HOW_REG			how
 WHY_REG			why
+WHERE_REG		where
 OF_REG			of
 COMPARES_REG		compares
 REF_REG			ref
+CASE_REG		case
+ESAC_REG		esac
+PROC_REG		proc
  /* end keywords */
 
 ASSIGN_REG		":"
@@ -51,14 +55,19 @@ DOT			"."
 SEMI_COLON		";"
 LEFT_CURBRA		"{"
 RIGHT_CURBRA		"}"
+TOPIC_QUOTE		"@"
+EQUAL			"="
+LEFT_BRA		"("
+RIGHT_BRA		")"
 %%
  /* 
   * Line_Comment
   */
-"#"				BEGIN(line_comment);
+"#"				BEGIN (line_comment);
 <line_comment>[^\n]		/* no operation */
 <line_comment>\n	{
 				curr_lineno++;
+				BEGIN (INITIAL);
 			}
 
  /*
@@ -93,6 +102,11 @@ RIGHT_CURBRA		"}"
 {SEMI_COLON}		{	return (';');		}
 {LEFT_CURBRA}		{	return ('{');		}
 {RIGHT_CURBRA}		{	return ('}');		}
+{TOPIC_QUOTE}		{	return ('@');		}
+{EQUAL}			{	return ('=');		}
+{LEFT_BRA}		{	return ('(');		}
+{RIGHT_BRA}		{	return (')');		}
+
 
  /* end of Operations */
 
@@ -107,9 +121,13 @@ RIGHT_CURBRA		"}"
 {WHEN_REG}		{	return (WHEN);		}
 {HOW_REG}		{	return (HOW);		}
 {WHY_REG}		{	return (WHY);		}
+{WHERE_REG}		{	return (WHERE);		}
 {OF_REG}		{	return (OF);		}
 {COMPARES_REG}		{	return (COMPARES);	}
 {REF_REG}		{	return (REF);		}
+{CASE_REG}		{	return (CASE);		}
+{ESAC_REG}		{	return (ESAC);		}
+{PROC_REG}		{	return (PROC);		}
 
  /* Keywords ends */
 

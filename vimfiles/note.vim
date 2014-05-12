@@ -21,6 +21,7 @@ syn keyword	snlTodo		contained TODO FIXME XXX NOTE
 
 " This is a descrpition of Comment
 syn match	snlComment	"\v#.*$"	contains=snlTodo
+" This is the trick about, contains yourself in, then you can write nested rule
 syn region	snlnComment	start="(\*" end="\*)"	contains=snlTodo,snlnComment
 
 syn region	snlBlock	start='{' end='}' fold transparent

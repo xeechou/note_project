@@ -21,7 +21,7 @@ syn keyword	snlTodo		contained TODO FIXME XXX NOTE
 
 " This is a descrpition of Comment
 syn match	snlComment	"\v#.*$"	contains=snlTodo
-syn match	snlComment	"\v(\*.*\*)" 	contains=snlTodo
+syn region	snlnComment	start="(\*" end="\*)"	contains=snlTodo,snlnComment
 
 syn region	snlBlock	start='{' end='}' fold transparent
 
@@ -38,6 +38,7 @@ syn match	snlEscape	+\\[abfnrtv'"\\\$]+ contained
 let b:current_syntax='snl'
 hi def link	snlTodo		Todo
 hi def link	snlComment	Comment
+hi def link	snlnComment	Comment
 hi def link	snlType		Type
 hi def link	snlNum		Number
 hi def link	snlStr		String

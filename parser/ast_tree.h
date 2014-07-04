@@ -1,0 +1,234 @@
+#ifndef AST_TREE_H
+#define AST_TREE_H
+
+/* This file is a collection of data structures which describe abstract syntax
+ * tree, not the final storage file, storage could be much more simple.
+ */
+
+#include "snl.h"
+#include "snl_list.h"
+#include "stringtab.h"
+#include "snl_stringtab.h"
+
+/* for future optimization */
+struct debug_info {
+	int curr_lineno;
+};
+
+typedef struct List node; 
+
+typedef struct Program Program_; 
+typedef struct Topic Topic_;
+typedef struct Feature Feature_;
+typedef struct Kpt Kpt_;
+typedef struct List_ List_;
+typedef struct Proc Proc_;
+typedef struct Basic_expr Basic_expr_;
+typedef struct Formal Formal_;
+typedef struct Navig Navig_;
+typedef struct Formal_navig Formal_navig_;
+typedef struct Enum_navig Enum_navig_;
+typedef struct Let_navig Let_navig_;
+typedef struct Case_navig Case_navig_;
+typedef struct Assign Assign_;
+typedef struct Conn Conn_;
+typedef struct Const Const_;
+
+
+
+/* the struct is used to represent a subset of certern structs,
+ * every struct is started with curr_lineno, list, (*dump)(int n),
+ * (dump function points to the exact function that will display
+ * information of expressions,
+ * */
+
+/* TODO: use node_struct in this way :
+ * struct some_struct {
+ * 	struct node_struct;
+ * 	type data;
+ * 	...
+ * };
+ * This mechanism may increase the complexity of dump function */
+
+
+struct Program {
+	int curr_lineno;
+	struct List *topic_list;	/* which points to the first list in Topic_ */
+};
+typedef  Program_ *program__;
+
+struct Topic {
+	int curr_lineno;
+	struct List list;
+	int (*dump) (int n, struct List *pos);
+
+	str_symbol name;
+	struct List *features;
+} ;
+typedef Topic_ *topic__;
+
+struct Kpt {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+	struct List *attr_l;
+	str_symbol name;
+	str_symbol aka_name;
+	str_symbol subset_name;
+};
+typedef Kpt_ *kpt__;
+
+struct List_ {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	struct List *nlist;
+};
+typedef List_ *list__;
+
+struct Proc {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+};
+typedef Proc_ *proc__;
+/* not completed struct */
+
+struct Formal {
+	struct List list;
+	str_symbol topic;
+	str_symbol kpt;
+	str_symbol attr;
+};
+typedef Formal_ *formal__;
+
+struct Basic_expr {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	str_symbol attr_name;
+	struct List *con;
+};
+typedef Basic_expr_  *basic_expr__;
+
+/****** navigation options ******/
+/* I guess I still need a function
+ * to handle difference between navigations
+ */
+
+struct Formal_navig {
+	int curr_lineno;
+	struct List list;	/* as a node of navigation list */
+	int (*dump) (int n, struct List *pos);
+
+	formal__ formal;
+	struct List *alist;	/* point to the first assignment node */
+	/* problem, I cannot be sure is which kind of assignment */
+};
+typedef Formal_navig_ *formal_navig__;
+
+
+struct Enum_navig {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	struct List *formal_assign;
+};
+typedef Enum_navig_ *enum_navig__;
+
+
+struct Let_navig {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	struct List *formal_list;
+	struct List *alist;
+};
+typedef Let_navig_ *let_navig__;
+
+struct Case_navig {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	str_symbol attr;
+	struct List *formal_assign;	/* It is also a formal list */
+};
+typedef Case_navig_ *case_navig__;
+
+/******* navigation options ****/
+
+/******* assignment options ****/
+struct Assign {
+	int curr_lineno;
+	struct List list;	/* as a node of assignment */
+};
+
+/* fix it in the future */
+struct Const {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	int type;
+	union {
+		str_symbol id;
+		Proc_  *proc;
+		str_symbol str;
+	} con;
+};
+typedef Const_  *const__;
+
+struct Conn {
+	int curr_lineno;
+	struct List list;
+	int (*dump) (int n, struct List *pos);
+	int type;
+	formal__ formal;
+	str_symbol name;
+	struct List *alist;
+};
+typedef Conn_ *conn__;
+
+/* the widely used function... */
+static inline node *single_node(node *n)
+{
+	init_list(n);
+	return n;
+}
+
+static inline node *append_node(node *a, node *b)
+{
+	list_append(a,b);
+	return a;
+}
+
+/*functions */
+extern node *topic_simple(Symbol name, node *features);
+extern node *kpt_feature(Kpt_* k);
+extern node *proc_feature(Proc_ *p);
+extern node *list_feature(List_ *l);
+extern Kpt_ *single_kpt(str_symbol, str_symbol, str_symbol, node *); 
+extern Kpt_ *kpt_const(Kpt_ *k, struct List *s);
+
+extern List_ *list_simple(node *n);
+
+extern node *basic_expr(str_symbol a, struct List *con);
+/* formal */
+extern Formal_ *navig(Symbol topic, Symbol kpt, str_symbol attr);
+
+extern node *formal_navig(formal__ formal, node *n);
+extern node *enum_navig(node *n);
+extern node *let_navig(node *n, node *a);
+extern node *case_navig(str_symbol attr, node *n);
+
+extern node *connection(formal__ formal, int type, Symbol name, node *alist);
+extern node *id_node(Symbol s);
+extern node *string_node(str_symbol s);
+
+
+#endif /*AST_TREE_H */

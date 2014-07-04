@@ -36,17 +36,31 @@ OBJID_REG		[A-Za-z_][A-Za-z_0-9]*
 TOPIC_REG		topic
 KPT_REG			kpt
 AKA_REG			AKA
+EXTERN_REG		extern
+LIST_REG		list
+PROC_REG		proc
+
 WHAT_REG		what
 WHEN_REG		when
+WHERE_REG		where
+WHO_REG			who
 HOW_REG			how
 WHY_REG			why
-WHERE_REG		where
-OF_REG			of
-COMPARES_REG		compares
-REF_REG			ref
+
 CASE_REG		case
+OF_REG			of
 ESAC_REG		esac
-PROC_REG		proc
+ENUM_REG		enum
+MUNE_REG		mune
+LET_REG			let
+IN_REG			in
+TEL_REG			tel
+
+CONNECT_REG		connect
+WITH_REG		with
+TO_REG			to
+FROM_REG		from
+ABOUT_REG		about
  /* end keywords */
 
 ASSIGN_REG		":"
@@ -114,20 +128,34 @@ RIGHT_BRA		")"
   * KEYWORDS are case-sensitive, actually just lower-case in SNL
   * except AKA
   */
+
+
 {TOPIC_REG}		{ 	return (TOPIC);		}
 {KPT_REG}		{	return (KPT);		}	
 {AKA_REG}		{	return (AKA);		}
+{EXTERN_REG}		{	return (EXTERN);	}
+{LIST_REG}		{	return (LIST);		}
+{PROC_REG}		{	return (PROC);		}
+
 {WHAT_REG}		{	return (WHAT);		}
 {WHEN_REG}		{	return (WHEN);		}
+{WHERE_REG}		{	return (WHERE);		}
+{WHO_REG}		{	return (WHO);		}
 {HOW_REG}		{	return (HOW);		}
 {WHY_REG}		{	return (WHY);		}
-{WHERE_REG}		{	return (WHERE);		}
-{OF_REG}		{	return (OF);		}
-{COMPARES_REG}		{	return (COMPARES);	}
-{REF_REG}		{	return (REF);		}
+
 {CASE_REG}		{	return (CASE);		}
+{OF_REG}		{	return (OF);		}
 {ESAC_REG}		{	return (ESAC);		}
-{PROC_REG}		{	return (PROC);		}
+{LET_REG}		{	return (LET);		}
+{IN_REG}		{	return (IN);		}
+{TEL_REG}		{	return (TEL);		}
+
+{CONNECT_REG}		{	return (CONNECT);	}
+{WITH_REG}		{	return (WITH);		}
+{TO_REG}		{	return (TO);		}
+{FROM_REG}		{	return (FROM);		}
+{ABOUT_REG}		{	return (ABOUT);		}
 
  /* Keywords ends */
 
@@ -180,14 +208,17 @@ constant too long";
 				curr_lineno++;
 				return (ERROR);
 			}
+
 <str>\\			{	BEGIN(str_bkslash);		}
-<str_bkslash>\"	{	*str_buf_ptr++ = '\"';		
+
+<str_bkslash>\"		{	*str_buf_ptr++ = '\"';		
 				BEGIN(str);
 			}
 
 <str_bkslash>\\		{	*str_buf_ptr++ = '\\';		
 				BEGIN(str);
 			}
+
 <str_bkslash>\n		{	*str_buf_ptr++ = '\n';
 				curr_lineno++;
 				BEGIN(str);

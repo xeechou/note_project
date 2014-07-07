@@ -171,7 +171,25 @@ int dump_const(int n, node *pos)
 	}
 	return 0;
 }
+int dump_navig(int n, node *pos)
+{
+	Formal_ *f = list_entry(pos, Formal_, list);
 
+	p = pad(n);
+	fprintf(stream, "%s _formal\n",p);
+	p = pad(n+2);
+	if (f->topic);
+	fprintf(stream, "%s _topic\n", p);
+	dump_symbol(n, f->topic);
+
+	if (f->kpt);
+	fprintf(stream, "%s _kpt\n",p);
+	dump_symbol(n, f->kpt);
+	if (f->attr);
+	fprintf(stream, "%s _attr\n",p);
+	dump_symbol(n, f->attr);
+	return 0;
+}
 int dump_formal_navig(int n, node *pos)
 {
 	Formal_navig_ *fn = list_entry(pos, Formal_navig_, list);
@@ -181,39 +199,66 @@ int dump_formal_navig(int n, node *pos)
 	fprintf(stream, "%s _formal_navig\n",p);
 
 	/* dump formal */
-	Formal_ *f = fn->formal;
-	p = pad(n+2);
-	fprintf(stream, "%s _formal\n",p);
-	if (f->topic);
-	fprintf(stream, "%s _topic\n",p);
-	dump_symbol(n, f->topic);
-
-	if (f->kpt);
-	fprintf(stream, "%s _topic\n",p);
-	dump_symbol(n, f->kpt);
-	if (f->attr);
-	fprintf(stream, "%s _topic\n",p);
-	dump_symbol(n, f->attr);
-
+	dump_navig (n+2, fn->formal);
 	node *guard, al* = l->alist;
 	if (!al)
 		return 0;
 	do {
 		node_struct *attr = list_entry(al, node_struct, list);
 		dump_type = attr->dump;
-		if ((*dump_type) (n+2, &(attr->list)));
+		if ((*dump_type) (n+2, &(attr->list)))
+			;
 		al = at->next;
 	} while (al != guard);
 	return 0;
 }
 
-int dump_enum_navg(int n, node *pos)
+
+int dump_let_navig(int n, node *pos)
 {
-	Enum_navig_ *en = list_entry(pos, Enum_navig_, list);
-	dump_line(en->curr_lineno);
+	Let_navig_ *ln = list_entry(pos, Let_navig_, list);
+	dump_line(ln->curr_lineno);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _enum_navig\n",p);
+	fprintf(stream, "%s _let_navig\n", p);
 
+	//dump formal_list
+	node *guard, *fl = ln->formal_list;
+	if (fl) {
+		do {
+			//node_struct *formal_list = list_entry(fl, node_struct, list);
+			//dump_type = formal_list->dump;
+			//(*dump_type) (n+2, &(fl->list));
+			dump_navig(n+2, fl);
+			fl = fl->next;
+		} while (fl != guard);
+	}
+	/* fl here stands for alist */
+	guard, fl = ln->alist;
+	if (fl) {
+		do {
+			node_struct *alist = list_entry(fl, node_struct, list);
+			dump_type = alist->dump;
+			(*dump_type) (n+2, &(alist->list));
+			fl = fl->next;
+		}while (fl != quard);
+	}
+	return 0;
+}
 
+int dump_conn(int n, node *pos)
+{
+	Conn_ *c = list_entry(pos, Conn_, list);
+	dump_line(c->curr_lineno);
+
+	char *p = pad(n);
+
+	fprintf(stream, "%s %d_conn\n", c->type, p);
+
+	//dump formal
+	dump_navig (n+2, c->formal);
+	//dump OBJECID
+	dump_symbol(n+2, c->name);
+
+	dump_const (n+2, c->constant);
 }

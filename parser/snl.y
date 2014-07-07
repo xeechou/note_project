@@ -34,14 +34,14 @@ typedef  struct List *node_;
 %type <node_> basic_expr basic_exprs
 %type <node_> const const_list block_const
 %type <node_> navig_list navig
-%type <node_> assign_block assign_list assign
+%type <node_> assign
 %type <node_> const
+%type <node_> formal formal_list
 
 %type <kpt__> kpt kpt_simple
 %type <proc__> proc
 %type <list__> list
 %type <str_symbol> string attr
-%type <formal__> formal
 %%
 
  /* program */
@@ -68,7 +68,9 @@ typedef  struct List *node_;
 
 	feature
 	:	kpt			{$$ = kpt_feature($1);		} 
+	/*
 	|	proc			{$$ = proc_feature($1);		} 
+	*/
 	|	list			{$$ = list_feature($1);		}
 	;
 
@@ -105,8 +107,10 @@ typedef  struct List *node_;
 	:	basic_expr ';'			{$$ = single_node($1);	}
 	|	basic_exprs basic_expr ';'	{append_node($1, 
 							single_node($2));	}
+	/*return type: node */
 	basic_expr
 	:	attr 				{$$ = basic_expr($1, NULL);	}
+	/******* TODO: attr ":=" const ********/
 	|	attr ':' const			{$$ = basic_expr($1, $3);	}
 	;
 	
@@ -121,6 +125,7 @@ typedef  struct List *node_;
 	|	string				{$$ = $1;}
 	;
 	
+	/*return type: node */
 	formal 
 	: 	OBJECTID 			{$$ = navig(NULL, $1, NULL);	}
 	|	OBJECTID '@' OBJECTID		{$$ = navig($1, $3, NULL);	}
@@ -128,58 +133,61 @@ typedef  struct List *node_;
 	|	attr				{$$ = navig(NULL, NULL, $1);	}
 	;
 
+	formal_list
+	:	formal				{$$ = single_node($1);		}
+	|	formal_list ',' formal		{$$ = append_node($1,
+	;
+							single_node($2));	}
+
 	navig_list
 	: 	navig ';'			{$$ = single_node($1);		}
 	|	navig_list navig ';'		{$$ = append_node($1,
 							single_node($2));	}
 	;
 
-	/* function!!!!!!!!!!!*/
 	navig
+	
+	/* ENUM is totally unnecessary
+	 * :	ENUM single_navig_list MUNE	{$$ = enum_navig($2);		}
+	 */
+	/******* TODO: 	formal ":=" assign
+			formal "+=" assign */
 	:	formal ':' assgin		{$$ = formal_navig($1, $3); 	}
-
-	|	ENUM formal_list MUNE		{$$ = enum_navig($2);		}
 
 	|	LET formal_list IN assgin TEL	{$$ = let_navig($2, $4);	}
 
-	|	CASE attr OF formal_list ESAC 	{$$ = case_navig($2, $4);	}
-	;
-	/* return (struct List *) */
-	formal_list 
-	:  	formal ':' assgin ';'		
-	{	$$ = single_node(formal_navig($1, $3));			}
-	|	formal_list formal ':' assign';'
-	{	$$ = append_node($1, 
-			single_node(formal_navig($3,$5)));			}
+	/* CASE is not useful now, move it to future desgin 
+	|	CASE attr OF formal_list ':' ESAC	
+	{$$ = case_navig($2, $4);	}
+	*/
 	;
 
-	/* function!!!!!!!!!!!!!*/
-	/* assign is allowed to be a list, like like this
-	   WHAT : { 
-			{"hello"; 
-			  proc(); 
-			  dannie;}; 
-			{connect to };}
-	This is really fucked up, to many braces !!! 
+
+	/* FIX ME: there is a design problem, we cannot let user to add multiple edges
+ 	 * to  a node, fix it in the future version
 	 */
-	assign_block :	'{' assign_list '}'	{$$ = $2;			}
-	assign_list
-	:	assign ';' 			{$$ = single_node($1);	}
-	|	assign_list assign ';'		{$$ = append_node($1,
-							single_node($2));	}
-	;
-
+	/* return type: node */
 	assign
 	: 	const				{$$ = single_node($1);	}
 	|	block_const			{$$ = $1;}
 
-	|	CONNECT WITH formal ABOUT OBJECTID ':' assign
-	{	$$ = connection($3, WITH_CONN, $5, single_node($7));		}	
-	|	CONNECT TO formal ABOUT OBJECTID ':' assign
-	{	$$ = connection($3, TO_CONN, $5, single_node($7));		}
-	|	CONNECT FROM formal ABOUT OBJECTID ':' assign
-	{	$$ = connectionn($3, FROM_CONN, $5, single_node($7));		}
+	/* TODO: move CONNECT to const, the OBJECTID here makes connection not
+ 	 * usable...*/
+	|	CONNECT WITH formal ABOUT OBJECTID ':' const
+	{	$$ = single_node(
+			connection($3, WITH_CONN, $5, single_node($7))
+			);							}	
+	|	CONNECT TO formal ABOUT OBJECTID ':' const
+	{	$$ = signle_node(
+			onnection($3, TO_CONN, $5, single_node($7))
+			);							}
+
+	|	CONNECT FROM formal ABOUT OBJECTID ':' const
+	{	$$ = single_node(
+			connectionn($3, FROM_CONN, $5, single_node($7))
+			);							}
 	;
+	
 
 	block_const : '{' const_list '}'	{$$ = $2;			}
 	;

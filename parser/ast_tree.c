@@ -154,10 +154,13 @@ node *string_node(str_symbol s)
 	return &(cons->list);
 }
 
-Formal_ *navig(Symbol topic, Symbol kpt, str_symbol attr)
+node *navig(Symbol topic, Symbol kpt, str_symbol attr)
 {
 	int check = 0;
 	struct Formal *f = malloc(sizeof(struct Formal));
+	f->curr_lineno = curr_lineno;
+	f->dump = &dump_navig;
+
 	if (topic == NULL)
 		f->topic = NULL;
 	else {
@@ -176,11 +179,12 @@ Formal_ *navig(Symbol topic, Symbol kpt, str_symbol attr)
 	check += (attr == NULL) ? 0 : 1;
 	if (check == 0) 
 		exit(1);	/* change this */
-	return f;
+
+	return &(f->list);
 }
 
 
-node *formal_navig(formal__ formal, node *n)
+node *formal_navig(node* formal, node *n)
 {
 	Formal_navig_ *f = malloc(sizeof(Formal_navig_));
 	f->curr_lineno = curr_lineno;
@@ -191,15 +195,6 @@ node *formal_navig(formal__ formal, node *n)
 	return &(f->list);
 }
 
-node *enum_navig(node *n)
-{
-	Enum_navig_ *e = malloc(sizeof(Enum_navig_));
-	e->curr_lineno = curr_lineno;
-	e->dump = &dump_enum_navig;
-
-	e->formal_assign = n;
-	return &(e->list);
-}
 
 node *let_navig(node *n, node *a)
 {
@@ -212,19 +207,7 @@ node *let_navig(node *n, node *a)
 	return &(l->list);
 }
 
-node *case_navig(str_symbol attr, node *n)
-{
-	Case_navig_ *c = malloc(sizeof(Case_navig_));
-	c->curr_lineno = curr_lineno;
-	c->dump = dump_case_navig;
-
-	c->attr = attr;
-	/* need a bit more check here, formal_list has to be no attr */
-	c->formal_assign = n;
-	return &(c->list);
-}
-
-node *connection(formal__ formal, int type, Symbol name, node *alist)
+node *connection(node *formal, int type, Symbol name, node *alist)
 {
 	struct Conn *conn = malloc(sizeof(struct Conn));
 	conn->curr_lineno = curr_lineno;
@@ -235,5 +218,3 @@ node *connection(formal__ formal, int type, Symbol name, node *alist)
 	conn->alist = alist;
 	return &(conn->list);
 }
-
-

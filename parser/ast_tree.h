@@ -29,7 +29,7 @@ typedef struct Navig Navig_;
 typedef struct Formal_navig Formal_navig_;
 typedef struct Enum_navig Enum_navig_;
 typedef struct Let_navig Let_navig_;
-typedef struct Case_navig Case_navig_;
+//typedef struct Case_navig Case_navig_;
 typedef struct Assign Assign_;
 typedef struct Conn Conn_;
 typedef struct Const Const_;
@@ -71,6 +71,7 @@ struct Kpt {
 	int curr_lineno;
 	struct List list;
 	int (*dump)(int n, struct List *pos);
+
 	struct List *attr_l;
 	str_symbol name;
 	str_symbol aka_name;
@@ -96,7 +97,10 @@ typedef Proc_ *proc__;
 /* not completed struct */
 
 struct Formal {
+	int curr_lineno;
 	struct List list;
+	int (*dump)(int n, struct List *pos);	/* actually there is no dump function for formal, coz it is not necessary */
+
 	str_symbol topic;
 	str_symbol kpt;
 	str_symbol attr;
@@ -123,21 +127,13 @@ struct Formal_navig {
 	struct List list;	/* as a node of navigation list */
 	int (*dump) (int n, struct List *pos);
 
-	formal__ formal;
+	node *formal;
 	struct List *alist;	/* point to the first assignment node */
 	/* problem, I cannot be sure is which kind of assignment */
 };
 typedef Formal_navig_ *formal_navig__;
 
 
-struct Enum_navig {
-	int curr_lineno;
-	struct List list;
-	int (*dump)(int n, struct List *pos);
-
-	struct List *formal_assign;
-};
-typedef Enum_navig_ *enum_navig__;
 
 
 struct Let_navig {
@@ -149,16 +145,6 @@ struct Let_navig {
 	struct List *alist;
 };
 typedef Let_navig_ *let_navig__;
-
-struct Case_navig {
-	int curr_lineno;
-	struct List list;
-	int (*dump)(int n, struct List *pos);
-
-	str_symbol attr;
-	struct List *formal_assign;	/* It is also a formal list */
-};
-typedef Case_navig_ *case_navig__;
 
 /******* navigation options ****/
 
@@ -188,9 +174,9 @@ struct Conn {
 	struct List list;
 	int (*dump) (int n, struct List *pos);
 	int type;
-	formal__ formal;
+	node* formal;
 	str_symbol name;
-	struct List *alist;
+	struct List *constant;
 };
 typedef Conn_ *conn__;
 
@@ -219,14 +205,12 @@ extern List_ *list_simple(node *n);
 
 extern node *basic_expr(str_symbol a, struct List *con);
 /* formal */
-extern Formal_ *navig(Symbol topic, Symbol kpt, str_symbol attr);
+extern node *navig(Symbol topic, Symbol kpt, str_symbol attr);
 
-extern node *formal_navig(formal__ formal, node *n);
-extern node *enum_navig(node *n);
+extern node *formal_navig(node *formal, node *n);
 extern node *let_navig(node *n, node *a);
-extern node *case_navig(str_symbol attr, node *n);
 
-extern node *connection(formal__ formal, int type, Symbol name, node *alist);
+extern node *connection(node* formal, int type, Symbol name, node *alist);
 extern node *id_node(Symbol s);
 extern node *string_node(str_symbol s);
 

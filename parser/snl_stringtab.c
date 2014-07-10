@@ -39,8 +39,7 @@ int add_stringtable(str_array *arr, char *src, int len, char **dest)
 			return MEMOVERFLOW;
 		arr->max = NINIT*STRLEN_MAX;
 		arr->num = 0;
-	} else if ( 	/* if we tried to insert a OBJECTID in arr that already exists */
-			/* notice we don't check if array is str_arr */
+	} else if ( 	/* if we tried to insert a OBJECTID in arr that already exists, kind of ugly approach */
 		arr == &id_arr && (tmp = lookup_table(src, arr)) != 0 ) {
 		*dest = tmp;
 		return 0;
@@ -61,7 +60,8 @@ int add_stringtable(str_array *arr, char *src, int len, char **dest)
 
 /* append string b after a, only invoke this when a is the last string in
  * table */
-/* length included in '\0' */
+/* objectid doesn't allow append, so I don't need check if append string
+ * already in the arr */
 int concat_strtab(char *a, int lena,
 		char *b, int lenb,
 		str_array *arr)
@@ -122,6 +122,7 @@ append_string(str_symbol b, Symbol a, str_array *arr)
 	return b;
 }
 
+/*
 int main()
 {
 	strtable_init();
@@ -139,3 +140,4 @@ int main()
 	}
 	printf("%s\n", test->str);
 }
+*/

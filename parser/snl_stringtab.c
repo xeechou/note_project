@@ -32,7 +32,6 @@ char *lookup_table(char *s, str_array *arr)
 int add_stringtable(str_array *arr, char *src, int len, char **dest)
 {
 	char *tmp;
-	//len += 1;		/* for '\0' */
 	if (arr->array == NULL) {
 		arr->array = 
 			(char *)malloc(NINIT*STRLEN_MAX*sizeof(char));
@@ -40,8 +39,9 @@ int add_stringtable(str_array *arr, char *src, int len, char **dest)
 			return MEMOVERFLOW;
 		arr->max = NINIT*STRLEN_MAX;
 		arr->num = 0;
-	} else if (
-		tmp = lookup_table(src, arr)) {
+	} else if ( 	/* if we tried to insert a OBJECTID in arr that already exists */
+			/* notice we don't check if array is str_arr */
+		arr == &id_arr && (tmp = lookup_table(src, arr)) != 0 ) {
 		*dest = tmp;
 		return 0;
 	} else if (arr->num + len >= arr->max) {
@@ -59,7 +59,7 @@ int add_stringtable(str_array *arr, char *src, int len, char **dest)
 	return 0;
 }
 
-/* append a string b after a, only invoke this when a is the last string in
+/* append string b after a, only invoke this when a is the last string in
  * table */
 /* length included in '\0' */
 int concat_strtab(char *a, int lena,
@@ -83,62 +83,59 @@ int concat_strtab(char *a, int lena,
 		arr->array = tmp;
 	}
 	strncpy(ptr, b, lenb);
-	arr->num + lenb;
+	arr->num += lenb;
 	return 0;
 
 }
-/* add a single string to a table and return a str_symbol pointer */
-/* no check mechanism */
+/* add a single string to a table and return a str_symbol pointer
+assuming string length = strlen(str) + 1*/
 str_symbol single_string(Symbol a, str_array *arr)
 {
 	str_symbol s = malloc(sizeof(*s));
 	s->len = a->len;
-	int err = add_stringtable(arr, a->str, s->len+1, &(s->str));
+	int err = add_stringtable(arr, a->str, s->len, &(s->str));
 	if (err != 0) 
 		die(err);
+	/* release the node in list */
+	list_rm(&(a->list), a->list.prev, a->list.next);
 	free(a);
 	return s;
 }
 
 /* append a string to given table, it means that we need to del the '\0' at
  * ptr, add append there, okay, I need a deeper thought. */
-/* add two strings in the str_array arr, sb is follow the sa */
+/* add two strings in the str_array arr, sb is follow the sa
+assuming string length = strlen(str) + 1*/
 str_symbol 
 append_string(str_symbol b, Symbol a, str_array *arr)
 {
-	int err = concat_strtab(b->str,  b->len+1,
-                               (a->str), a->len+1, arr);
+	int err = concat_strtab(b->str,  b->len,
+                               (a->str), a->len, arr);
 	if (err != 0) {
-		printf("err using concat\n");
+		printf("error using concat\n");
 		exit(1);
 	}
-	b->len += a->len;
+	/* mistake: len(b) - 1 for the removed '\0' */
+	b->len += a->len - 1;
+	list_rm(&(a->list), a->list.prev, a->list.next);
 	free(a);
 	return b;
 }
+
 int main()
 {
-	char *tstr = "this is a test, you should be as verbose as possible."; 
-	char *adc = "this is a test, you should be as verbose as possible.";
+	strtable_init();
+	char *tstr = "This is a test!";
+	int i;
+	str_symbol test = single_string(
+		       add_string(strtable, tstr),
+		       &str_arr);
 
-	int len = strlen(tstr);
-	Symbol a = malloc(sizeof(*a) + len * sizeof(char));
-	strcpy(a->str, tstr);
-	a->len = len;
-	Symbol b = malloc(sizeof(*b) + len * sizeof(char));
-	strcpy(b->str, tstr);
-	b->len = len;
-	
-	//char *c, *d;
-	//add_stringtable(&str_arr, tstr, len+1, &c);
-	//add_stringtable(&str_arr, adc, len+1, &d);
-	//if (c == d)
-	//	printf("checked\n");
-	str_symbol c = single_string(a, &str_arr);
-	str_symbol d = single_string(b, &str_arr);
-	str_symbol c = append_string(c, b, &str_arr);
-	//This is gonna be wrong!!!
-	str_symbol f = single_string(a, &str_arr);
-	str_symbol f = append_string(c, f, &str_arr);
-	//printf("%s\n", d->str);
+	for (i = 0; i < 100; i++) {
+		test = append_string(
+				test,
+				add_string(strtable, tstr),
+				&str_arr);
+	}
+	printf("%s\n", test->str);
 }

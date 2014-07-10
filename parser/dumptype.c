@@ -2,6 +2,7 @@
 #include "dumptype.h"
 #include "ast_tree.h"
 #include "snl_list.h"
+#include "snl_const.h"
 typedef struct List node;
 /* This is for debugging */
 
@@ -79,7 +80,8 @@ int dump_topic(int n, node *pos)
 	dump_symbol(n+2, t->name);
 
 	/* the dump pointer function */
-	node *guard, *f = t->features;
+	node *guard, *f;
+	guard = f = t->features;
 	if (!f)
 		return 0;
 	do {
@@ -106,7 +108,8 @@ int dump_kpt(int n, node *pos)
 	if (k->subset_name)
 		dump_symbol(n+2, k->subset_name);
 
-	node *guard, *a = k->attr_l;
+	node *guard, *a;
+	guard = a = k->attr_l;
 	if (!a) //a stands for attr
 		return 0;
 	do {
@@ -127,7 +130,8 @@ int dump_list(int n, node *pos)
 	char *p = pad(n);
 	fprintf(stream, "%s _list\n", p);
 
-	node *guard, *nl = l->nlist;
+	node *guard, *nl;
+	guard = nl = l->nlist;
 	if (!nl)
 		return 0;
 	do {
@@ -175,7 +179,7 @@ int dump_navig(int n, node *pos)
 {
 	Formal_ *f = list_entry(pos, Formal_, list);
 
-	p = pad(n);
+	char *p = pad(n);
 	fprintf(stream, "%s _formal\n",p);
 	p = pad(n+2);
 	if (f->topic);
@@ -193,14 +197,15 @@ int dump_navig(int n, node *pos)
 int dump_formal_navig(int n, node *pos)
 {
 	Formal_navig_ *fn = list_entry(pos, Formal_navig_, list);
-	dump_line(fn, c->curr_lineno);
+	dump_line(n, fn->curr_lineno);
 
 	char *p = pad(n);
 	fprintf(stream, "%s _formal_navig\n",p);
 
 	/* dump formal */
 	dump_navig (n+2, fn->formal);
-	node *guard, al* = l->alist;
+	node *guard, *al;
+       	guard = al = fn->alist;
 	if (!al)
 		return 0;
 	do {
@@ -208,7 +213,7 @@ int dump_formal_navig(int n, node *pos)
 		dump_type = attr->dump;
 		if ((*dump_type) (n+2, &(attr->list)))
 			;
-		al = at->next;
+		al = al->next;
 	} while (al != guard);
 	return 0;
 }
@@ -217,13 +222,14 @@ int dump_formal_navig(int n, node *pos)
 int dump_let_navig(int n, node *pos)
 {
 	Let_navig_ *ln = list_entry(pos, Let_navig_, list);
-	dump_line(ln->curr_lineno);
+	dump_line(n, ln->curr_lineno);
 
 	char *p = pad(n);
 	fprintf(stream, "%s _let_navig\n", p);
 
 	//dump formal_list
-	node *guard, *fl = ln->formal_list;
+	node *guard, *fl;
+	guard = fl = ln->formal_list;
 	if (fl) {
 		do {
 			//node_struct *formal_list = list_entry(fl, node_struct, list);
@@ -234,14 +240,14 @@ int dump_let_navig(int n, node *pos)
 		} while (fl != guard);
 	}
 	/* fl here stands for alist */
-	guard, fl = ln->alist;
+	guard = fl = ln->alist;
 	if (fl) {
 		do {
 			node_struct *alist = list_entry(fl, node_struct, list);
 			dump_type = alist->dump;
 			(*dump_type) (n+2, &(alist->list));
 			fl = fl->next;
-		}while (fl != quard);
+		}while (fl != guard);
 	}
 	return 0;
 }
@@ -249,7 +255,7 @@ int dump_let_navig(int n, node *pos)
 int dump_conn(int n, node *pos)
 {
 	Conn_ *c = list_entry(pos, Conn_, list);
-	dump_line(c->curr_lineno);
+	dump_line(n, c->curr_lineno);
 
 	char *p = pad(n);
 

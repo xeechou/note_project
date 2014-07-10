@@ -50,6 +50,13 @@ static inline void list_add (struct List *new,
 	prev->next = new;
 	new->prev = prev;
 }
+static inline void list_rm(struct List *del,
+			   struct List *next,
+			   struct List *prev)
+{
+	prev->next = next;
+	next->prev = prev;
+}
 /* append a node at the end of list */
 static inline void list_append (struct List *list, struct List *node)
 {

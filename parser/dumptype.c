@@ -70,6 +70,18 @@ void dump_symbol(int n, str_symbol sym)
  * }
  */
 
+int dump_program(Program_ *p)
+{
+	node *guard, *f;
+	guard = f = p->topic_list;
+	if (!f)
+		return 0;
+	do {
+		dump_topic(0, f);
+		f = f->next;
+	} while (f != guard);
+	return 0;
+}
 int dump_topic(int n, node *pos)
 {
 	Topic_ *t = list_entry(pos, Topic_, list);

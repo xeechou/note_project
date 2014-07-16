@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "stringtab.h"
-#include "snl.h"
+#include "snl_list.h"
 struct str_table *idtable, *strtable;
 void strtable_init()
 {

@@ -26,11 +26,18 @@ typedef struct string_array {
 	int  max;
 }str_array;
 
+str_symbol
+	what,
+	when,
+	where,
+	who,
+	why,
+	how;
+
 enum {NINIT = 1, NGROW = 2};
 
-int add_stringtab(str_array *, char *, int len, char **);
+static int add_stringtable(str_array *arr, char *src, int len, char **dest);
 
-int concat_string(char *a, int lena, char *b, int lenb, str_array *arr);
 
 str_symbol single_string(Symbol, str_array *);
 str_symbol  append_string(str_symbol, Symbol, str_array *);

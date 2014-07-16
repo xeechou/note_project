@@ -1,14 +1,13 @@
 #ifndef AST_TREE_H
 #define AST_TREE_H
-
 /* This file is a collection of data structures which describe abstract syntax
  * tree, not the final storage file, storage could be much more simple.
  */
 
-#include "snl.h"
 #include "snl_list.h"
 #include "stringtab.h"
 #include "snl_stringtab.h"
+
 
 /* for future optimization */
 struct debug_info {
@@ -55,7 +54,6 @@ struct Program {
 	int curr_lineno;
 	struct List *topic_list;	/* which points to the first list in Topic_ */
 };
-typedef  Program_ *program__;
 
 struct Topic {
 	int curr_lineno;
@@ -65,7 +63,6 @@ struct Topic {
 	str_symbol name;
 	struct List *features;
 } ;
-typedef Topic_ *topic__;
 
 struct Kpt {
 	int curr_lineno;
@@ -77,7 +74,6 @@ struct Kpt {
 	str_symbol aka_name;
 	str_symbol subset_name;
 };
-typedef Kpt_ *kpt__;
 
 struct List_ {
 	int curr_lineno;
@@ -86,14 +82,12 @@ struct List_ {
 
 	struct List *nlist;
 };
-typedef List_ *list__;
 
 struct Proc {
 	int curr_lineno;
 	struct List list;
 	int (*dump)(int n, struct List *pos);
 };
-typedef Proc_ *proc__;
 /* not completed struct */
 
 struct Formal {
@@ -105,7 +99,6 @@ struct Formal {
 	str_symbol kpt;
 	str_symbol attr;
 };
-typedef Formal_ *formal__;
 
 struct Basic_expr {
 	int curr_lineno;
@@ -115,7 +108,6 @@ struct Basic_expr {
 	str_symbol attr_name;
 	struct List *con;
 };
-typedef Basic_expr_  *basic_expr__;
 
 /****** navigation options ******/
 /* I guess I still need a function
@@ -131,7 +123,6 @@ struct Formal_navig {
 	struct List *alist;	/* point to the first assignment node */
 	/* problem, I cannot be sure is which kind of assignment */
 };
-typedef Formal_navig_ *formal_navig__;
 
 
 
@@ -144,7 +135,6 @@ struct Let_navig {
 	struct List *formal_list;
 	struct List *alist;
 };
-typedef Let_navig_ *let_navig__;
 
 /******* navigation options ****/
 
@@ -167,7 +157,6 @@ struct Const {
 		str_symbol str;
 	} con;
 };
-typedef Const_  *const__;
 
 struct Conn {
 	int curr_lineno;
@@ -178,7 +167,6 @@ struct Conn {
 	str_symbol name;
 	struct List *constant;
 };
-typedef Conn_ *conn__;
 
 /* the widely used function... */
 static inline node *single_node(node *n)
@@ -194,11 +182,12 @@ static inline node *append_node(node *a, node *b)
 }
 
 /*functions */
+extern Program_ *program(node *topics);
 extern node *topic_simple(Symbol name, node *features);
 extern node *kpt_feature(Kpt_* k);
 extern node *proc_feature(Proc_ *p);
 extern node *list_feature(List_ *l);
-extern Kpt_ *single_kpt(str_symbol, str_symbol, str_symbol, node *); 
+extern Kpt_ *kpt_simple(str_symbol, str_symbol, str_symbol, node *); 
 extern Kpt_ *kpt_const(Kpt_ *k, struct List *s);
 
 extern List_ *list_simple(node *n);

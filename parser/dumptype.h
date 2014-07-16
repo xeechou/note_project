@@ -3,8 +3,10 @@
 //#include <stdio.h>
 //incomplete struct
 typedef struct List node;
+typedef struct Program Program_;
 static int (*dump_type) (int n, node *pos) = (void *)0;
 
+int dump_program(Program_ *p);
 int dump_topic(int n, node *pos);
 int dump_kpt(int n, node *pos);
 int dump_list(int n, node *pos);

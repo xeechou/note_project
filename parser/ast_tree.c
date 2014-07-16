@@ -2,61 +2,15 @@
 #include "snl_const.h"
 #include "dumptype.h"
 #include "snl_stringtab.h"
-#include <stdio.h>
 #include <stdlib.h>
-extern int curr_lineno;
-/* here we need to install basic attrs
- * what, when, how, why, where
- */
-/* put it in snl.h */
+int curr_lineno;
 
-static void initialize_constants(void)
+Program_ *program(node *topics)
 {
-	/* fix the exit(1) later */
-	int err;
-	what  = malloc(sizeof(* what));
-	what->len = 4;
-	if (err = 
-	   add_stringtab(&id_arr, "what", 5, &(what->str)) ) {
-		exit(1);
-	};
-
-	when  = malloc(sizeof(* when));
-	when->len = 4;
-	if (err = 
-	   add_stringtab(&id_arr, "when", 5, &(when->str)) ) {
-		exit(1);
-	};
-
-	where = malloc(sizeof(*where));
-	where->len = 5;
-	if (err = 
-	   add_stringtab(&id_arr, "where", 6, &(where->str)) ) {
-		exit(1);
-	}
-
-	who   = malloc(sizeof(*  who));
-	who->len = 3;
-	if (err = 
-	add_stringtab(&id_arr, "who", 4, &(who->str)) ) {
-		exit(1);
-	}
-
-	why   = malloc(sizeof(*  why));
-	why->len = 3;
-	if (err = 
-	add_stringtab(&id_arr, "why", 4, &(why->str)) ) {
-		exit(1);
-	}
-
-	how   = malloc(sizeof(*  how));
-	how->len = 3;
-	if (err = 
-	add_stringtab(&id_arr, "how", 4, &(how->str)) ) {
-		exit(1);
-	}
+	Program_ *p = malloc(sizeof(Program_));
+	p->topic_list = topics;
+	return p;
 }
-
 node *topic_simple(Symbol name, node *features)
 {
 	Topic_ *t = malloc(sizeof(Topic_));
@@ -85,7 +39,7 @@ node *list_feature(List_ *l)
 	return &(l->list);
 }
 
-Kpt_ *single_kpt(str_symbol name, 
+Kpt_ *kpt_simple(str_symbol name, 
 		 str_symbol aka_name,
 		 str_symbol subset_name,
 		 node * expr_list)
@@ -215,6 +169,6 @@ node *connection(node *formal, int type, Symbol name, node *alist)
 	conn->formal = formal;
 	conn->type = type; 
 	conn->name = single_string(name, &id_arr);
-	conn->alist = alist;
+	conn->constant = alist;
 	return &(conn->list);
 }

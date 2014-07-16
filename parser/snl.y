@@ -1,22 +1,35 @@
 %{
 #include <stdio.h>
-#include "snl.h"
-#include "ast_tree.h"
 
-extern char *curr_filename;
 
+/* I don't know what's the point, since we use the curr_lineno provided by
+ * yylex(), and set every node location by hand, we just omit it
+ */
 #define YYLTYPE int
+#define yylloc curr_lineno
+#define YYLLOC_DEFAULT(Current, Rhs, N)
+
 extern int curr_lineno;
+extern char *curr_filename;
 
 void yyerror(char *s);
 extern int yylex();
 
-/* for the sake of %type */
-typedef  struct List *node_;
+#define YY_KEYWORDS
+#include "ast_tree.h"
+#include "snl_const.h"
+extern Program_ *ast_root;
+
 %}
 
 %union {
+	Program_ program__;
+	Kpt_ *kpt__;
+	List_ *list__;
+	node *node_;
 	Symbol  symbol;
+	str_symbol strsymbol;
+	char *err_msg;
 }
 
 %token TOPIC 201 KPT 202 AKA 203 EXTERN 204 LIST 205 PROC 206
@@ -35,22 +48,21 @@ typedef  struct List *node_;
 %type <node_> const const_list block_const
 %type <node_> navig_list navig
 %type <node_> assign
-%type <node_> const
 %type <node_> formal formal_list
 
 %type <kpt__> kpt kpt_simple
-%type <proc__> proc
+ /* %type <proc__> proc */
 %type <list__> list
-%type <str_symbol> string attr
+%type <strsymbol> string attr
 %%
 
  /* program */
-	program  : topics 		{@$ = @1; ast_root = program($1);}
+	program  : topics 		{ast_root = program($1);}
 	;
 	
  /* topics */
 	topics
-	:	topic 			{$$ = signle_node($1);	}
+	:	topic 			{$$ = single_node($1);	}
 	|	topics topic		{$$ = append_node($1,
 					 	 single_node($2));	}
 	;
@@ -81,24 +93,33 @@ typedef  struct List *node_;
 		{$$ = kpt_const($1, single_node( 
 				     basic_expr(what,
 				      single_node(
-					string_node($3))));		}
+					string_node($3)))));		}
 	|	kpt_simple ':' '{' basic_exprs '}' ';'
 		{$$ = kpt_const($1, $4);				}
-
-	/* not yet completed */
-	|	LIST '{' navig_list '}' ';'
-		{$$ = list_simple($3);	}
 	;
 
 	kpt_simple
 	:	KPT OBJECTID
-		{$$ = single_kpt($2, NULL, NULL, NULL);			}
+		{$$ = kpt_simple(single_string($2, &id_arr), 
+				NULL, NULL, NULL);			}
 	|	KPT OBJECTID AKA OBJECTID
-		{$$ = single_kpt($2, $4, NULL, NULL);			}
+		{$$ = kpt_simple(single_string($2, &id_arr), 
+				 single_string($4, &id_arr), 
+					NULL, NULL);			}
 	|	KPT OBJECTID EXTERN OBJECTID
-		{$$ = single_kpt($2, NULL, $4, NULL);			}
+		{$$ = kpt_simple(single_string($2, &id_arr), 
+				 NULL, 
+				 single_string($4, &id_arr), 
+				 NULL);					}
 	|	KPT OBJECTID AKA OBJECTID EXTERN OBJECTID
-		{$$ = single_kpt($2, $4, $6, NULL);			}
+		{$$ = kpt_simple(single_string($2, &id_arr), 
+				 single_string($4, &id_arr), 
+				 single_string($6, &id_arr),
+				 NULL);					}
+	;
+
+	list :	LIST '{' navig_list '}' ';'
+		{$$ = list_simple($3);	}
 	;
 
 	
@@ -136,8 +157,7 @@ typedef  struct List *node_;
 	formal_list
 	:	formal				{$$ = single_node($1);		}
 	|	formal_list ',' formal		{$$ = append_node($1,
-	;
-							single_node($2));	}
+							single_node($3));	}
 
 	navig_list
 	: 	navig ';'			{$$ = single_node($1);		}
@@ -152,9 +172,9 @@ typedef  struct List *node_;
 	 */
 	/******* TODO: 	formal ":=" assign
 			formal "+=" assign */
-	:	formal ':' assgin		{$$ = formal_navig($1, $3); 	}
+	:	formal ':' assign		{$$ = formal_navig($1, $3); 	}
 
-	|	LET formal_list IN assgin TEL	{$$ = let_navig($2, $4);	}
+	|	LET formal_list IN assign TEL	{$$ = let_navig($2, $4);	}
 
 	/* CASE is not useful now, move it to future desgin 
 	|	CASE attr OF formal_list ':' ESAC	
@@ -178,13 +198,13 @@ typedef  struct List *node_;
 			connection($3, WITH_CONN, $5, single_node($7))
 			);							}	
 	|	CONNECT TO formal ABOUT OBJECTID ':' const
-	{	$$ = signle_node(
-			onnection($3, TO_CONN, $5, single_node($7))
+	{	$$ = single_node(
+			connection($3, TO_CONN, $5, single_node($7))
 			);							}
 
 	|	CONNECT FROM formal ABOUT OBJECTID ':' const
 	{	$$ = single_node(
-			connectionn($3, FROM_CONN, $5, single_node($7))
+			connection($3, FROM_CONN, $5, single_node($7))
 			);							}
 	;
 	
@@ -200,16 +220,14 @@ typedef  struct List *node_;
 
 	const 
 	: 	string				{$$ = string_node($1);		}
-	|	OBJECTID			{$$ = id_node($1); free($1);	}
+	|	OBJECTID			{$$ = id_node($1); 		}
 	;
 
 	string
 	: 	STR_CONST			
-		{$$ = single_string($1,&str_arr);
-		 free($1);							}
+		{$$ = single_string($1,&str_arr); 				}
 	|	string STR_CONST		
-		{$$ = append_string($1, $2, &str_arr);
-		 free($2);							}
+		{$$ = append_string($1, $2, &str_arr);				}
 	;
 %%
 

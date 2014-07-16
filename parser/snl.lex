@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-#include "snl.h"
+#include "snl_parser.h"
 #include "stringtab.h"
 extern int curr_lineno;
 static int nested_cmtl = 0;

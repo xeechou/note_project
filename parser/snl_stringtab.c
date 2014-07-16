@@ -7,6 +7,7 @@
 
 str_array id_arr;
 str_array str_arr;
+
 void die(int errorno)
 {
 	fprintf(stderr, "died\n");
@@ -29,24 +30,23 @@ char *lookup_table(char *s, str_array *arr)
 	} while(final - ptr > 0);
 	return NULL;
 }
-int add_stringtable(str_array *arr, char *src, int len, char **dest)
+/* add single string to the dynamic array, with check mechanism */
+static int add_stringtable(str_array *arr, char *src, int len, char **dest)
 {
 	char *tmp;
 	if (arr->array == NULL) {
-		arr->array = 
-			(char *)malloc(NINIT*STRLEN_MAX*sizeof(char));
-		if (arr->array == NULL)
+		if ((arr->array = 
+			(char *)malloc(NINIT*STRLEN_MAX*sizeof(char)))
+		 == NULL)
 			return MEMOVERFLOW;
 		arr->max = NINIT*STRLEN_MAX;
 		arr->num = 0;
-	} else if ( 	/* if we tried to insert a OBJECTID in arr that already exists, kind of ugly approach */
+	} else if (
 		arr == &id_arr && (tmp = lookup_table(src, arr)) != 0 ) {
 		*dest = tmp;
 		return 0;
 	} else if (arr->num + len >= arr->max) {
-		tmp = (char *)realloc(arr->array, 
-				arr->max*NGROW); /* if not null, the len of array must be bigger than 
-									STRLEN_MAX */
+		tmp = (char *) realloc(arr->array, arr->max*NGROW); 
 		if (tmp == NULL)
 			return MEMOVERFLOW;
 		arr->max *= NGROW;
@@ -58,86 +58,87 @@ int add_stringtable(str_array *arr, char *src, int len, char **dest)
 	return 0;
 }
 
-/* append string b after a, only invoke this when a is the last string in
- * table */
-/* objectid doesn't allow append, so I don't need check if append string
- * already in the arr */
-int concat_strtab(char *a, int lena,
-		char *b, int lenb,
-		str_array *arr)
-{
-	char *ptr = arr->array + arr->num;
-
-	if (arr->array == NULL)		/* if arr not initialized */
-		return NO_ARR_IN_TABLE;
-	if (a + lena != ptr)		/* if a is not last string in table */
-		return NOT_LAST_STR;
-
-	ptr--; arr->num--;
-	if (arr->num + lenb >= arr->max) {
-		char *tmp = (char *)realloc(arr->array,
-				arr->max * NGROW);
-		if (tmp == NULL)
-			return MEMOVERFLOW;
-		arr->max *= NGROW;
-		arr->array = tmp;
-	}
-	strncpy(ptr, b, lenb);
-	arr->num += lenb;
-	return 0;
-
-}
-/* add a single string to a table and return a str_symbol pointer
-assuming string length = strlen(str) + 1*/
 str_symbol single_string(Symbol a, str_array *arr)
 {
 	str_symbol s = malloc(sizeof(*s));
-	s->len = a->len;
-	int err = add_stringtable(arr, a->str, s->len, &(s->str));
+	int err = add_stringtable(arr, a->str, a->len, &(s->str));
 	if (err != 0) 
 		die(err);
+	s->len = a->len;
 	/* release the node in list */
 	list_rm(&(a->list), a->list.prev, a->list.next);
 	free(a);
 	return s;
 }
-
-/* append a string to given table, it means that we need to del the '\0' at
- * ptr, add append there, okay, I need a deeper thought. */
-/* add two strings in the str_array arr, sb is follow the sa
-assuming string length = strlen(str) + 1*/
+/* append string a to b, for now it only works when b is the last string in arr */
 str_symbol 
 append_string(str_symbol b, Symbol a, str_array *arr)
 {
-	int err = concat_strtab(b->str,  b->len,
-                               (a->str), a->len, arr);
-	if (err != 0) {
-		printf("error using concat\n");
-		exit(1);
+	/* check if b is the last one in the arr */
+	if (arr->array == NULL)
+		die(NO_ARR_IN_TABLE);
+	else if (b->str + b->len != arr->array + arr->num)
+		die(NOT_LAST_STR);
+
+	else {
+		int err;
+		char *trash;	/* trash here is for the sake of b->str */
+		arr->num -= 1;
+		if ((err = add_stringtable(arr, a->str, a->len, &trash)))
+			die(err);
 	}
-	/* mistake: len(b) - 1 for the removed '\0' */
 	b->len += a->len - 1;
 	list_rm(&(a->list), a->list.prev, a->list.next);
 	free(a);
 	return b;
 }
 
-/*
-int main()
+/* here we need to install basic attrs
+ * what, when, how, why, where
+ */
+void initialize_constants(void)
 {
-	strtable_init();
-	char *tstr = "This is a test!";
-	int i;
-	str_symbol test = single_string(
-		       add_string(strtable, tstr),
-		       &str_arr);
+	/* fix the exit(1) later */
+	int err;
+	what  = malloc(sizeof(* what));
+	what->len = 4;
+	if ((err = 
+	   add_stringtable(&id_arr, "what", 5, &(what->str))) ) {
+		exit(1);
+	};
 
-	for (i = 0; i < 100; i++) {
-		test = append_string(
-				test,
-				add_string(strtable, tstr),
-				&str_arr);
+	when  = malloc(sizeof(* when));
+	when->len = 4;
+	if ((err = 
+	   add_stringtable(&id_arr, "when", 5, &(when->str))) ) {
+		exit(1);
+	};
+
+	where = malloc(sizeof(*where));
+	where->len = 5;
+	if ((err = 
+	   add_stringtable(&id_arr, "where", 6, &(where->str))) ) {
+		exit(1);
 	}
-	printf("%s\n", test->str);
+
+	who   = malloc(sizeof(*  who));
+	who->len = 3;
+	if ((err = 
+	add_stringtable(&id_arr, "who", 4, &(who->str))) ) {
+		exit(1);
+	}
+
+	why   = malloc(sizeof(*  why));
+	why->len = 3;
+	if ((err = 
+	add_stringtable(&id_arr, "why", 4, &(why->str))) ) {
+		exit(1);
+	}
+
+	how   = malloc(sizeof(*  how));
+	how->len = 3;
+	if ((err = 
+	add_stringtable(&id_arr, "how", 4, &(how->str))) ) {
+		exit(1);
+	}
 }
-*/

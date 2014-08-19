@@ -77,10 +77,11 @@ RIGHT_BRA		")"
  /* 
   * Line_Comment
   */
-"#"				BEGIN(line_comment);
+"#"				BEGIN (line_comment);
 <line_comment>[^\n]		/* no operation */
 <line_comment>\n	{
 				curr_lineno++;
+				BEGIN (INITIAL);
 			}
 
  /*

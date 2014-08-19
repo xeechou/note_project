@@ -276,9 +276,5 @@ constant too long";
 
  /* String ends */
 <<EOF>>			{	yyterminate();			}
-\0			{	yyterminate();			}
-.			{	snl_yylval.err_msg = yytext;
-				return (ERROR);
-			}
+.
 %%
-

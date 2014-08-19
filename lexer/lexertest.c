@@ -2,24 +2,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include "snl.h"
-#include "stringtab.h"
+#include <sys/stat.h>
+#include "snail.h"
+#include "snail_tab.h"
 void show_snl_token(FILE *file, int lineno, int token, YYSTYPE yylval);
 char *token_to_string(int token);
 
 extern int yylex();
 extern int yy_flex_debug;
 
-/* ugly init */
-void init()
-{
-	idtable = malloc(sizeof(struct str_table));
-	idtable->entry = malloc(sizeof(struct Entry));
-	init_list(&(idtable->entry->list));
-	strtable = malloc(sizeof(struct str_table));
-	strtable->entry = malloc(sizeof(struct Entry));
-	init_list(&(strtable->entry->list));
-}
 
 FILE *xfopen(const char *filename, const char *how)	/* stop from here */
 {
@@ -45,14 +36,19 @@ typedef struct Entry *Symbol;
 int curr_lineno = 1;
 extern FILE *yyin;
 /* escape the argv[0], all other arguments is input file */
+
+symbol_tab id_table;
+symbol_tab str_table;
+
 int main(int argc, char **argv)
 {
-	init();
 	int nfiles;
 	int i = nfiles = (argc > 1) ? argc-1 : 1;
 	/* trick here is let files[0] to be stdin first, then see if it will
 	 * get replaced by 'real' file, so we avoid branch */
 	char *files[nfiles];
+	size_t fsize;
+	struct stat st;
 	files[0] = "stdin";
 	while (i > 0 )  {
 		files[i-1] = argv[i];
@@ -60,14 +56,24 @@ int main(int argc, char **argv)
 	}
 	int token;
 	for (i = 0; i < nfiles; i++) {
+		// open file and get state
 		yyin = xfopen(files[i], "r");
 		if (yyin == NULL) {
 			fprintf(stderr, "cannot open input file %s\n", files[i]);
 			exit(1);
 		}
+		fstat(fileno(yyin), &st);
+		fsize = st.st_size;
+		////////////////////////////
+		st_init(&id_table, fsize, 
+				&symbol_hash,
+				str_cmp);
+		st_init(&str_table, fsize,
+				&string_hash,
+				str_cmp);
 
 		curr_lineno = 1;
-		/* scan the input file */
+		// scan the input file 
 		printf("#filename \"%s\"\n", files[i]);
 		while ((token = yylex()) != 0) {
 			show_snl_token(stdout, curr_lineno, token, snl_yylval);
@@ -82,16 +88,16 @@ void show_snl_token(FILE *file, int lineno, int token, YYSTYPE yylval)
 	char *msg = NULL;
 	switch (token) {
 		case STR_CONST :
-			msg = (yylval.symbol)->str;
+			msg = (yylval.sym)->str;
 		break;
 		case OBJECTID :
-			msg = (yylval.symbol)->str;
+			msg = (yylval.sym)->str;
 		break;
 		case ERROR :
 			msg = yylval.err_msg;
 		break;
 	}
-	fprintf(file, "#lineno %4d %s", lineno, token_to_string(token));
+	fprintf(file, "#lineno %4d %s ", lineno, token_to_string(token));
 	if (msg == NULL)
 		fprintf(file, "\n");
 	else 
@@ -112,8 +118,6 @@ char *token_to_string(int token)
 		case HOW:	return "HOW";		break;
 		case WHY:	return "WHY";		break;
 		case OF:	return "OF";		break;
-		case COMPARES:	return "COMPARES";	break;
-		case REF:	return "REF";		break;
 		case ERROR:	return "ERROR";		break;
 		case ':':	return "':'";		break;
 		case ',':	return "','";		break;

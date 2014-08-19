@@ -36,13 +36,31 @@ OBJID_REG		[A-Za-z_][A-Za-z_0-9]*
 TOPIC_REG		topic
 KPT_REG			kpt
 AKA_REG			AKA
+EXTERN_REG		extern
+LIST_REG		list
+PROC_REG		proc
+
 WHAT_REG		what
 WHEN_REG		when
+WHERE_REG		where
+WHO_REG			who
 HOW_REG			how
 WHY_REG			why
+
+CASE_REG		case
 OF_REG			of
-COMPARES_REG		compares
-REF_REG			ref
+ESAC_REG		esac
+ENUM_REG		enum
+MUNE_REG		mune
+LET_REG			let
+IN_REG			in
+TEL_REG			tel
+
+CONNECT_REG		connect
+WITH_REG		with
+TO_REG			to
+FROM_REG		from
+ABOUT_REG		about
  /* end keywords */
 
 ASSIGN_REG		":"
@@ -51,6 +69,10 @@ DOT			"."
 SEMI_COLON		";"
 LEFT_CURBRA		"{"
 RIGHT_CURBRA		"}"
+TOPIC_QUOTE		"@"
+EQUAL			"="
+LEFT_BRA		"("
+RIGHT_BRA		")"
 %%
  /* 
   * Line_Comment
@@ -93,6 +115,10 @@ RIGHT_CURBRA		"}"
 {SEMI_COLON}		{	return (';');		}
 {LEFT_CURBRA}		{	return ('{');		}
 {RIGHT_CURBRA}		{	return ('}');		}
+{TOPIC_QUOTE}		{	return ('@');		}
+{EQUAL}			{	return ('=');		}
+{LEFT_BRA}		{	return ('(');		}
+{RIGHT_BRA}		{	return (')');		}
 
  /* end of Operations */
 
@@ -103,13 +129,29 @@ RIGHT_CURBRA		"}"
 {TOPIC_REG}		{ 	return (TOPIC);		}
 {KPT_REG}		{	return (KPT);		}	
 {AKA_REG}		{	return (AKA);		}
+{EXTERN_REG}		{	return (EXTERN);	}
+{LIST_REG}		{	return (LIST);		}
+{PROC_REG}		{	return (PROC);		}
+
 {WHAT_REG}		{	return (WHAT);		}
 {WHEN_REG}		{	return (WHEN);		}
+{WHERE_REG}		{	return (WHERE);		}
+{WHO_REG}		{	return (WHO);		}
 {HOW_REG}		{	return (HOW);		}
 {WHY_REG}		{	return (WHY);		}
+
+{CASE_REG}		{	return (CASE);		}
 {OF_REG}		{	return (OF);		}
-{COMPARES_REG}		{	return (COMPARES);	}
-{REF_REG}		{	return (REF);		}
+{ESAC_REG}		{	return (ESAC);		}
+{LET_REG}		{	return (LET);		}
+{IN_REG}		{	return (IN);		}
+{TEL_REG}		{	return (TEL);		}
+
+{CONNECT_REG}		{	return (CONNECT);	}
+{WITH_REG}		{	return (WITH);		}
+{TO_REG}		{	return (TO);		}
+{FROM_REG}		{	return (FROM);		}
+{ABOUT_REG}		{	return (ABOUT);		}
 
  /* Keywords ends */
 

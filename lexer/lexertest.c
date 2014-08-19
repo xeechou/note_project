@@ -112,8 +112,8 @@ char *token_to_string(int token)
 		case HOW:	return "HOW";		break;
 		case WHY:	return "WHY";		break;
 		case OF:	return "OF";		break;
-		case COMPARES:	return "COMPARES";	break;
-		case REF:	return "REF";		break;
+		//case COMPARES:	return "COMPARES";	break;
+		//case REF:	return "REF";		break;
 		case ERROR:	return "ERROR";		break;
 		case ':':	return "':'";		break;
 		case ',':	return "','";		break;

@@ -6,7 +6,7 @@ LEX = flex  ${FFLAGS}
 
 OBJS = lexertest.c  snl-lex.c stringtab.c stringtab.h snl.h snl_list.h
 INCLUDE =  -I.
-CFLAGS = -Wall -g -finline-functions ${INCLUDE}
+CFLAGS = -Wall -ggdb3 -finline-functions ${INCLUDE}
 
 
 lexer : ${OBJS}

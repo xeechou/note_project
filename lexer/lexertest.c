@@ -78,6 +78,8 @@ int main(int argc, char **argv)
 		while ((token = yylex()) != 0) {
 			show_snl_token(stdout, curr_lineno, token, snl_yylval);
 		}
+		st_dispose(&id_table);
+		st_dispose(&str_table);
 		xfclose(yyin);
 	}
 	return 0;
@@ -88,13 +90,13 @@ void show_snl_token(FILE *file, int lineno, int token, YYSTYPE yylval)
 	char *msg = NULL;
 	switch (token) {
 		case STR_CONST :
-			msg = (yylval.sym)->str;
+			msg = (snl_yylval.sym)->str;
 		break;
 		case OBJECTID :
-			msg = (yylval.sym)->str;
+			msg = (snl_yylval.sym)->str;
 		break;
 		case ERROR :
-			msg = yylval.err_msg;
+			msg = snl_yylval.err_msg;
 		break;
 	}
 	fprintf(file, "#lineno %4d %s ", lineno, token_to_string(token));

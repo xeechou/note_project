@@ -20,7 +20,6 @@ extern symbol_tab str_table;
 #define EOF_IN_STR	-3
 %}
 
-%option noyywrap
 %x			comment
 %x			line_comment
 %x			str
@@ -123,15 +122,12 @@ RIGHT_BRA		")"
 {LEFT_BRA}		{	return ('(');		}
 {RIGHT_BRA}		{	return (')');		}
 
-
  /* end of Operations */
 
  /*
   * KEYWORDS are case-sensitive, actually just lower-case in SNL
   * except AKA
   */
-
-
 {TOPIC_REG}		{ 	return (TOPIC);		}
 {KPT_REG}		{	return (KPT);		}	
 {AKA_REG}		{	return (AKA);		}
@@ -276,5 +272,9 @@ constant too long";
 
  /* String ends */
 <<EOF>>			{	yyterminate();			}
-.
+.			{	snl_yylval.err_msg = yytext;
+				return (ERROR);
+			}
 %%
+
+int yywrap(void) { return 1;}

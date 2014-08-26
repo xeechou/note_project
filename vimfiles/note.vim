@@ -10,10 +10,11 @@ if exists("b:current_syntax")
 endif
 
 " Basic Keywords
-syn keyword 	snlType		kpt topic
-syn keyword	snlProperty	what when how why
-syn keyword	snlConnect	of compares ref AKA
-syn keyword	snlStatement	has which
+syn keyword 	snlType		kpt topic proc func
+syn keyword	snlProperty	what when how where who why
+syn keyword	snlConnect	of extern ref AKA return
+syn keyword	snlStatement	case of esac let in tel
+syn keyword	snlStatement	connect with to from about
 
 syn match	snlNum		'\d\*\.\d\+'
 syn match	snlNum		'[-+]\d\*\.\d\+'

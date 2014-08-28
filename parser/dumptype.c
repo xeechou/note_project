@@ -44,7 +44,7 @@ void dump_line(int n, int lineno)
 	fprintf(stream, "%s #%d\n", p, lineno);
 }
 
-void dump_symbol(int n, str_symbol sym)
+void dump_symbol(int n, symbol *sym)
 {
 	char *p = pad(n);
 	fprintf(stream, "%s #%s\n", p, sym->str);		
@@ -122,7 +122,7 @@ int dump_kpt(int n, node *pos)
 
 	node *guard, *a;
 	guard = a = k->attr_l;
-	if (!a) //a stands for attr
+	if (!a)
 		return 0;
 	do {
 		node_struct *attr = list_entry(a, node_struct, list);
@@ -133,45 +133,46 @@ int dump_kpt(int n, node *pos)
 	} while (a != guard);
 	return 0;
 }
-
-int dump_list(int n, node *pos)
+int dump_func(int n, node *pos)
 {
-	List_ *l = list_entry(pos, List_, list);
-	dump_line(n, l->curr_lineno);
+	Func_ *f = list_entry(pos, Func_, list);
+	dump_line(n, f->curr_lineno);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _list\n", p);
+	fprintf(stream, "%s _Func\n", p);
+	dump_symbol(n+2, f->name);
 
-	node *guard, *nl;
-	guard = nl = l->nlist;
-	if (!nl)
+	//dump_args
+	if (f->args == NULL)
 		return 0;
-	do {
-		node_struct *expr = list_entry(nl, node_struct, list);
-		dump_type = expr->dump;
-		if ((*dump_type) (n+2, &(expr->list)));
-		nl = nl->next;
-	} while (nl != guard);
+	else {
+		node *guard, *a;
+		guard = a = f->args;
+		do {
+			dump_const(n+2, a);
+		} while (a != guard);
+	}
 	return 0;
 }
+
 /* dump the basic expr */
-int dump_expr(int n, node *pos)
+int dump_attr(int n, node *pos)
 {
-	Basic_expr_ *be = list_entry(pos, Basic_expr_, list);
+	Attr_Stat_ *be = list_entry(pos, Attr_Stat_, list);
 	dump_line(n, be->curr_lineno);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _basic_expr\n", p);
+	fprintf(stream, "%s _attr_stat\n", p);
 	
-	/* leaves */
 	dump_symbol(n+2, be->attr_name);
-	/* basic expr doesn't allow const list, but single const is just
-	 * list, but we don't need a loop here
-	 */
-	if (be->con)
-		dump_const(n+2, be->con);
+	if (be->expr) {
+		//dump the expr
+		node_struct *e = list_entry(be->expr, node_struct, list);
+		e->dump(n+2, be->expr); 
+	}
+	return 0;
 }
-
+/* it could either called in id_list or const */
 int dump_const(int n, node *pos)
 {
 	Const_ *c = list_entry(pos, Const_, list);
@@ -189,78 +190,80 @@ int dump_const(int n, node *pos)
 }
 int dump_navig(int n, node *pos)
 {
-	Formal_ *f = list_entry(pos, Formal_, list);
+	Navig_ *f = list_entry(pos, Navig_, list);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _formal\n",p);
+	fprintf(stream, "%s _navig\n",p);
 	p = pad(n+2);
-	if (f->topic);
+	if (f->topic)
 	fprintf(stream, "%s _topic\n", p);
 	dump_symbol(n, f->topic);
 
-	if (f->kpt);
+	if (f->kpt)
 	fprintf(stream, "%s _kpt\n",p);
 	dump_symbol(n, f->kpt);
-	if (f->attr);
+	if (f->attr)
 	fprintf(stream, "%s _attr\n",p);
 	dump_symbol(n, f->attr);
 	return 0;
 }
-int dump_formal_navig(int n, node *pos)
+int dump_label_stat(int n, node *pos)
 {
-	Formal_navig_ *fn = list_entry(pos, Formal_navig_, list);
+	Label_Stat_ *fn = list_entry(pos, Label_Stat_, list);
 	dump_line(n, fn->curr_lineno);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _formal_navig\n",p);
+	fprintf(stream, "%s _label_Stat\n",p);
 
-	/* dump formal */
-	dump_navig (n+2, fn->formal);
-	node *guard, *al;
-       	guard = al = fn->alist;
-	if (!al)
-		return 0;
-	do {
-		node_struct *attr = list_entry(al, node_struct, list);
-		dump_type = attr->dump;
-		if ((*dump_type) (n+2, &(attr->list)))
-			;
-		al = al->next;
-	} while (al != guard);
+	/* dump navig */
+	dump_navig (n+2, fn->navig);
+
+	node_struct *attr = list_entry(fn->expr, node_struct, list);
+	attr->dump (n+2, &(attr->list));
 	return 0;
 }
 
 
-int dump_let_navig(int n, node *pos)
+int dump_let_stat(int n, node *pos)
 {
-	Let_navig_ *ln = list_entry(pos, Let_navig_, list);
+	Let_Stat_ *ln = list_entry(pos, Let_Stat_, list);
 	dump_line(n, ln->curr_lineno);
 
 	char *p = pad(n);
-	fprintf(stream, "%s _let_navig\n", p);
+	fprintf(stream, "%s _let_Stat\n", p);
 
-	//dump formal_list
+	//dump navig_list
+	if (!pos)
+		return 0;
 	node *guard, *fl;
-	guard = fl = ln->formal_list;
+	guard = fl = ln->navig_list;
 	if (fl) {
 		do {
-			//node_struct *formal_list = list_entry(fl, node_struct, list);
-			//dump_type = formal_list->dump;
-			//(*dump_type) (n+2, &(fl->list));
 			dump_navig(n+2, fl);
 			fl = fl->next;
 		} while (fl != guard);
 	}
 	/* fl here stands for alist */
-	guard = fl = ln->alist;
+	fl = ln->expr;
+	node_struct *expr;
 	if (fl) {
-		do {
-			node_struct *alist = list_entry(fl, node_struct, list);
-			dump_type = alist->dump;
-			(*dump_type) (n+2, &(alist->list));
-			fl = fl->next;
-		}while (fl != guard);
+		expr = list_entry(fl, node_struct, list);
+		dump_type = expr->dump;
+		expr->dump (n+2, &(expr->list));
 	}
+	return 0;
+}
+int dump_case_stat(int n, node *pos)
+{
+	Case_Stat_ *c = list_entry(pos, Case_Stat_, list);
+	dump_line(n, c->curr_lineno);
+
+	char *p = pad(n);
+	fprintf(stream, "%s _Case_Stat\n", p);
+
+	dump_symbol(n+2, c->name);
+
+	//forget about the statement, I'm tired
 	return 0;
 }
 
@@ -270,13 +273,44 @@ int dump_conn(int n, node *pos)
 	dump_line(n, c->curr_lineno);
 
 	char *p = pad(n);
+	fprintf(stream, "%s %d_conn\n", p, c->type);
 
-	fprintf(stream, "%s %d_conn\n", c->type, p);
+	//dump navig
+	dump_navig (n+2, c->navig);
+	node_struct *s;
+	if (c->expr) {
+		s = list_entry(c->expr, node_struct, list);
+		s->dump(n+2, &(s->list));
+	}
+	return 0;
+}
+int dump_dispatch(int n, node *pos)
+{
+	Dispatch_ *d = list_entry(pos, Dispatch_, list);
+	dump_line(n, d->curr_lineno);
 
-	//dump formal
-	dump_navig (n+2, c->formal);
-	//dump OBJECID
-	dump_symbol(n+2, c->name);
+	char *p = pad(n);
+	fprintf(stream, "%s _dispatch\n", p);
+	//again, I'm so tired of it
+	return 0;
 
-	dump_const (n+2, c->constant);
+}
+int dump_operation(int n, node *pos)
+{
+	Operation_ *o = list_entry(pos, Operation_, list);
+	dump_line(n, o->curr_lineno);
+
+	char *p = pad(n);
+
+	fprintf(stream, "%s %d_operation\n", p, o->type);
+	//dump expr a
+	node_struct *expr;
+	expr = list_entry(o->a, node_struct, list);
+	dump_type = expr->dump;
+	expr->dump (n+2, &(expr->list));
+	//dump expr b
+	expr = list_entry(o->b, node_struct, list);
+	dump_type = expr->dump;
+	expr->dump (n+2, &(expr->list));
+	return 0;
 }

@@ -1,8 +1,9 @@
 #ifndef SNL_LIST_H
 #define SNL_LIST_H
-
+/* TODO: change this shit to single_list so that we can support
+ * nil_expressions */
 struct List {
-	struct List *next, *prev;	/* include this struct in your data struct */
+	struct List *next, *prev;
 };
 /*
  * offsetof

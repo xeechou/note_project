@@ -1,33 +1,42 @@
 
 CC = gcc
-CFLAGS = -g -Wall 
+CFLAGS = -ggdb3 -Wall 
 YYAC = bison
 LEX = flex
 
-LEXS = snl.lex
-LEXC = snl-lex.c
+LEXS = snail.lex
+LEXC = snail-lex.c
+LEXH = snail_parser.h
 
-YYSRC = snl.y
-YYC   = snl-yy.c
-CSRC = parsertest.c ast_tree.c dumptype.c snl_stringtab.c stringtab.c ${LEXC} ${YYC}
+YYSRC = snail.y
+YYC   = snail-yy.c
+CSRC = parsertest.c ast_tree.c dumptype.c snail_tab.c ${LEXC} ${YYC}
 OBJS = ${CSRC:.c=.o}
 DEPEND = ${CC} -MM
 
+#subsystem
+SLIBS = misctypes
+SLIBOPT = -L./misc -l${SLIBS}
+MAKE = make
 
 parser : ${OBJS}
-	${CC} ${CFLAGS} ${OBJS} -o $@
+	${CC} ${OBJS} ${SLIBOPT} -o $@
+
+${SLIBS}:
+	cd misc/ && ${MAKE}
 
 ${LEXC} : ${LEXS}
 	${LEX} -o $@ ${LEXS}
 
-${YYC} : ${YYSRC}
-	${YYAC} -o $@ ${YYSRC}
+${YYC} ${LEXH}: ${YYSRC}
+	${YYAC} -v --defines=${LEXH} --output=${YYC} ${YYSRC}
 
 %.d: %.c
+	${CC} ${CFLAGS} -c $<
 	${DEPEND} $< | sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@
 
 -include ${CSRC:.c=.d}
 
 .PHONY : clean
 clean : 
-	-rm -f *.o *~ parser
+	-rm -f *.o *.d *~ ${LEXC} ${YYC} ${LEXH} parser

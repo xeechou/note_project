@@ -5,9 +5,10 @@
  */
 
 #include "snl_list.h"
-#include "stringtab.h"
-#include "snl_stringtab.h"
-
+#include "snail_tab.h"
+extern symbol_tab id_table;
+extern symbol_tab str_table;
+extern symbol_tab str_psr_tab;
 
 /* for future optimization */
 struct debug_info {
@@ -20,19 +21,18 @@ typedef struct Program Program_;
 typedef struct Topic Topic_;
 typedef struct Feature Feature_;
 typedef struct Kpt Kpt_;
-typedef struct List_ List_;
+typedef struct Func Func_;
 typedef struct Proc Proc_;
-typedef struct Basic_expr Basic_expr_;
-typedef struct Formal Formal_;
-typedef struct Navig Navig_;
-typedef struct Formal_navig Formal_navig_;
-typedef struct Enum_navig Enum_navig_;
-typedef struct Let_navig Let_navig_;
-//typedef struct Case_navig Case_navig_;
-typedef struct Assign Assign_;
+typedef struct Attr_Stat Attr_Stat_;
+typedef struct Label_Stat Label_Stat_;
+typedef struct Let_Stat Let_Stat_;
+typedef struct Case_Stat Case_Stat_;
+typedef struct Expr Expr_;
 typedef struct Conn Conn_;
+typedef struct Dispatch Dispatch_;
+typedef struct Operation Operation_;
 typedef struct Const Const_;
-
+typedef struct Navig Navig_;
 
 
 /* the struct is used to represent a subset of certern structs,
@@ -60,7 +60,7 @@ struct Topic {
 	struct List list;
 	int (*dump) (int n, struct List *pos);
 
-	str_symbol name;
+	symbol * name;
 	struct List *features;
 } ;
 
@@ -70,17 +70,19 @@ struct Kpt {
 	int (*dump)(int n, struct List *pos);
 
 	struct List *attr_l;
-	str_symbol name;
-	str_symbol aka_name;
-	str_symbol subset_name;
+	symbol * name;
+	symbol * aka_name;
+	symbol * subset_name;
 };
 
-struct List_ {
+struct Func {
 	int curr_lineno;
 	struct List list;
 	int (*dump)(int n, struct List *pos);
-
-	struct List *nlist;
+	//function is sequences of statements
+	symbol *name;
+	struct List *args;
+	struct List *stat_l;
 };
 
 struct Proc {
@@ -88,63 +90,63 @@ struct Proc {
 	struct List list;
 	int (*dump)(int n, struct List *pos);
 };
-/* not completed struct */
+/* not a completed struct */
 
-struct Formal {
-	int curr_lineno;
-	struct List list;
-	int (*dump)(int n, struct List *pos);	/* actually there is no dump function for formal, coz it is not necessary */
 
-	str_symbol topic;
-	str_symbol kpt;
-	str_symbol attr;
-};
-
-struct Basic_expr {
+struct Attr_Stat {
 	int curr_lineno;
 	struct List list;
 	int (*dump)(int n, struct List *pos);
 
-	str_symbol attr_name;
-	struct List *con;
+	symbol * attr_name;
+	struct List *expr;
 };
 
-/****** navigation options ******/
-/* I guess I still need a function
- * to handle difference between navigations
- */
+/****** Statation options ******/
 
-struct Formal_navig {
+struct Label_Stat {
 	int curr_lineno;
-	struct List list;	/* as a node of navigation list */
+	struct List list;	/* as a node of Statation list */
 	int (*dump) (int n, struct List *pos);
 
-	node *formal;
-	struct List *alist;	/* point to the first assignment node */
-	/* problem, I cannot be sure is which kind of assignment */
+	node *navig;
+	struct List *expr;
 };
 
-
-
-
-struct Let_navig {
+struct Let_Stat {
 	int curr_lineno;
 	struct List list;
 	int (*dump)(int n, struct List *pos);
 
-	struct List *formal_list;
-	struct List *alist;
+	struct List *navig_list;
+	struct List *expr;
 };
 
-/******* navigation options ****/
+struct Case_Stat {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
 
-/******* assignment options ****/
-struct Assign {
+	symbol *name;
+	struct List *stat_l;
+
+};
+/******* Statation options ****/
+
+
+
+
+
+
+
+
+
+/******* expressions ****/
+struct Expr {
 	int curr_lineno;
 	struct List list;	/* as a node of assignment */
 };
 
-/* fix it in the future */
 struct Const {
 	int curr_lineno;
 	struct List list;
@@ -152,22 +154,48 @@ struct Const {
 
 	int type;
 	union {
-		str_symbol id;
+		symbol * id;
 		Proc_  *proc;
-		str_symbol str;
+		symbol * str;
 	} con;
 };
 
+struct Navig {
+	int curr_lineno;
+	struct List list;
+	int (*dump)(int n, struct List *pos);
+
+	int in_function;
+	symbol * topic;
+	symbol * kpt;
+	symbol * attr;
+};
+/*checked */
 struct Conn {
 	int curr_lineno;
 	struct List list;
 	int (*dump) (int n, struct List *pos);
 	int type;
-	node* formal;
-	str_symbol name;
-	struct List *constant;
-};
+	node* navig;
 
+	struct List *expr;
+};
+struct Dispatch {
+	int curr_lineno;
+	struct List list;
+	int (*dump) (int n, struct List *pos);
+
+	symbol *func_name;
+	struct List *expr_l;
+};
+struct Operation {
+	int curr_lineno;
+	struct List list;
+	int (*dump) (int n, struct List *pos);
+	int type;
+	node *a;
+	node *b;
+};
 /* the widely used function... */
 static inline node *single_node(node *n)
 {
@@ -182,26 +210,29 @@ static inline node *append_node(node *a, node *b)
 }
 
 /*functions */
-extern Program_ *program(node *topics);
-extern node *topic_simple(Symbol name, node *features);
-extern node *kpt_feature(Kpt_* k);
-extern node *proc_feature(Proc_ *p);
-extern node *list_feature(List_ *l);
-extern Kpt_ *kpt_simple(str_symbol, str_symbol, str_symbol, node *); 
-extern Kpt_ *kpt_const(Kpt_ *k, struct List *s);
+Program_ *program(node *topics);
+node *topic_simple(symbol * name, node *features);
+node *kpt_feature(Kpt_* k);
+node *proc_feature(Proc_ *p);
+node *func_feature(Func_ *l);
+Kpt_ *kpt_simple(symbol *, symbol *, symbol *, node *); 
+Kpt_ *kpt_const(Kpt_ *k, struct List *s);
 
-extern List_ *list_simple(node *n);
+Func_ * function(symbol *name, node *args, node *stat_l);
 
-extern node *basic_expr(str_symbol a, struct List *con);
-/* formal */
-extern node *navig(Symbol topic, Symbol kpt, str_symbol attr);
+node *attr_stat(symbol * a, struct List *con);
 
-extern node *formal_navig(node *formal, node *n);
-extern node *let_navig(node *n, node *a);
+node *navig(symbol * topic, symbol * kpt, symbol * attr);
 
-extern node *connection(node* formal, int type, Symbol name, node *alist);
-extern node *id_node(Symbol s);
-extern node *string_node(str_symbol s);
+node *label_stat(node *navig, node *n);
+node *let_stat(node *n, node *a);
+node *case_stat(symbol *name, node *stat_l);
+node *connection(node* navig, int type, node *expr);
+node *dispatch(symbol *func_name, node *expr_l);
+//new functions 
+node *operation(node *a, node *b, int type);
+node *id_node(symbol * s);
+node *string_node(symbol * s);
 
 
 #endif /*AST_TREE_H */

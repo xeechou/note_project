@@ -45,14 +45,11 @@ int main(int argc, char **argv)
 void init(size_t fsize)
 {
 	st_init(&id_table, fsize,
-			&symbol_hash,
-			str_cmp);
+			&symbol_hash);
 	st_init(&str_table, fsize,
-			&string_hash,
-			str_cmp);
+			&string_hash);
 	st_init(&str_psr_tab, fsize,
-			&string_hash,
-			str_cmp);
+			&string_hash);
 	what  = st_add_string(&id_table, "what");
 	when  = st_add_string(&id_table, "when");
 	who   = st_add_string(&id_table, "who");

@@ -36,7 +36,6 @@ symbol *st_add_string(symbol_tab *st, char *str)
 	}
 	return test;
 }
-
 /* concat_string tries to append string later after formal,
  * remember formal is in parser table, later is in lexer table.
  */
@@ -67,6 +66,10 @@ symbol *st_concat_string(symbol_tab *st, symbol *formal, symbol *later)
 	formal->len = formal->len + later->len + 1;
 	return oht_lookup(&st->table, formal, CRE);
 	//actually, return value should be formal again.
+}
+symbol *single_string(symbol_tab *st, symbol *s)
+{
+	return st_add_string(st, s->str);
 }
 /* djb2 is a good hash function for string, it's fast and little collision.
  * The original reference: http://www.cse.yorku.ca/~oz/hash.html   

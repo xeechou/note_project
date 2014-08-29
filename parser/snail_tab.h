@@ -25,6 +25,8 @@ void st_init(symbol_tab *st, size_t file_size,
 void st_dispose(symbol_tab *st);
 symbol *st_add_string(symbol_tab *st, char *str);
 symbol *st_concat_string(symbol_tab *st, symbol *formal, symbol *later);
+symbol *single_string(symbol_tab *st, symbol *sym);
+#define append_string(a, b, c) 	  st_concat_string(a, b, c)
 /* two extral hash function */
 unsigned long 
 string_hash(void *sym, size_t hashsize);

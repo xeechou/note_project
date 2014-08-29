@@ -19,7 +19,7 @@ SLIBS = misctypes
 SLIBOPT = -L./misc -l${SLIBS}
 MAKE = make
 
-parser : ${OBJS}
+parser : ${OBJS} ${SLIBS}
 	${CC} ${OBJS} ${SLIBOPT} -o $@
 
 ${SLIBS}:

@@ -3,7 +3,7 @@ CFLAGS = -Wall -ggdb3
 LEX = flex
 
 LSRC = snail.lex
-LEXC = snail-lex.c
+LEXC = snail_lex.c
 
 CSRC = lexertest.c  snail_tab.c ${LEXC}
 OBJS = ${CSRC:.c=.o}

@@ -32,14 +32,14 @@ void xfclose(FILE *fp)
 		fclose(fp);
 }
 
-typedef struct Entry *Symbol;
 int curr_lineno = 1;
 extern FILE *yyin;
+
 /* escape the argv[0], all other arguments is input file */
 
 symbol_tab id_table;
 symbol_tab str_table;
-
+char *str_buf;
 int main(int argc, char **argv)
 {
 	int nfiles;
@@ -66,20 +66,19 @@ int main(int argc, char **argv)
 		fsize = st.st_size;
 		////////////////////////////
 		st_init(&id_table, fsize, 
-				&symbol_hash,
-				str_cmp);
+				&symbol_hash);
 		st_init(&str_table, fsize,
-				&string_hash,
-				str_cmp);
-
+				&string_hash);
+		str_buf = malloc((fsize + 1) * sizeof(char) );
 		curr_lineno = 1;
 		// scan the input file 
 		printf("#filename \"%s\"\n", files[i]);
 		while ((token = yylex()) != 0) {
-			show_snl_token(stdout, curr_lineno, token, snl_yylval);
+			show_snl_token(stdout, curr_lineno, token, snail_yylval);
 		}
 		st_dispose(&id_table);
 		st_dispose(&str_table);
+		free(str_buf);
 		xfclose(yyin);
 	}
 	return 0;
@@ -90,13 +89,13 @@ void show_snl_token(FILE *file, int lineno, int token, YYSTYPE yylval)
 	char *msg = NULL;
 	switch (token) {
 		case STR_CONST :
-			msg = (snl_yylval.sym)->str;
+			msg = (snail_yylval.sym)->str;
 		break;
 		case OBJECTID :
-			msg = (snl_yylval.sym)->str;
+			msg = (snail_yylval.sym)->str;
 		break;
 		case ERROR :
-			msg = snl_yylval.err_msg;
+			msg = snail_yylval.err_msg;
 		break;
 	}
 	fprintf(file, "#lineno %4d %s ", lineno, token_to_string(token));
@@ -121,6 +120,8 @@ char *token_to_string(int token)
 		case WHY:	return "WHY";		break;
 		case OF:	return "OF";		break;
 		case ERROR:	return "ERROR";		break;
+		case ASSIGN_E:	return ":=";		break;
+		case ASSIGN_A:  return "+=";		break;
 		case ':':	return "':'";		break;
 		case ',':	return "','";		break;
 		case '.':	return "'.'";		break;

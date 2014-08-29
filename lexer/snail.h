@@ -5,12 +5,14 @@
 enum {
 	STR_CONST = 150,
 	OBJECTID = 151,
+	ASSIGN_E = 152,
+	ASSIGN_A = 153,
 
 	TOPIC  = 201,
 	KPT    = 202,
 	AKA    = 203,
 	EXTERN = 204,
-	LIST   = 205,
+	FUNC   = 205,
 	PROC   = 206,
 
 	WHAT  = 251,
@@ -49,6 +51,6 @@ typedef union snl_yylval
 	char *err_msg;
 }YYSTYPE;
 
-YYSTYPE snl_yylval;
+YYSTYPE snail_yylval;
 
 #endif /*SNL_H */

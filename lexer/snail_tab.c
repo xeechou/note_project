@@ -3,19 +3,24 @@
 #include "snail_tab.h"
 #include "misc/misc_types.h"
 
+void *magic_val_init = NULL;
+void *magic_val_deleted = (void *)1;
+
 /* this is never generic */ 
+static int str_chk(void *, int, size_t);
+static int str_cmp(const void *, const void *);
+
 void st_init(symbol_tab *st, size_t file_size, 
-		unsigned long(* hash) (void *, size_t),
-		int (* hash_cmp) (const void *, const void *))
+		unsigned long(* hash) (void *, size_t))
 {
-	lht_init(&st->table, sizeof(symbol), 32, hash, hash_cmp, NULL);
+	oht_init(&st->table, sizeof(symbol), 32, hash, str_cmp, &str_chk, NULL);
 
 	smm_init(&st->arr, sizeof(char), file_size * 2, file_size, NULL);
 }
 
 void st_dispose(symbol_tab *st)
 {
-	lht_dispose(&st->table);
+	oht_dispose(&st->table);
 	smm_dispose(&st->arr);
 }
 
@@ -24,13 +29,12 @@ symbol *st_add_string(symbol_tab *st, char *str)
 	symbol e;
 	e.len = strlen(str);
 	e.str = str;
-	symbol *test = lht_lookup(&st->table, &e, NOC);
+	symbol *test = oht_lookup(&st->table, &e, NOC);
 	if (!test) {
 		smm_append(&st->arr, str, (void **)&(e.str), e.len + 1);
-		test = lht_lookup(&st->table, &e, CRE);
+		test = oht_lookup(&st->table, &e, CRE);
 	}
 	return test;
-	
 }
 
 /* concat_string tries to append string later after formal,
@@ -58,10 +62,10 @@ symbol *st_concat_string(symbol_tab *st, symbol *formal, symbol *later)
 		smm_append(&st->arr, later->str, (void *)&trash, later->len+1);
 	}
 	//now we have to update formal's hash value
-	lht_delete(&st->table, formal);
+	oht_delete(&st->table, formal);
 	formal->str = sym;
 	formal->len = formal->len + later->len + 1;
-	return lht_lookup(&st->table, formal, CRE);
+	return oht_lookup(&st->table, formal, CRE);
 	//actually, return value should be formal again.
 }
 /* djb2 is a good hash function for string, it's fast and little collision.
@@ -100,10 +104,36 @@ symbol_hash(void *sym, size_t hashsize)
 	}
 	return hashval % hashsize;
 }
-int str_cmp(const void *a, const void *b)
+static int str_cmp(const void *a, const void *b)
 {
 	/* actually, it compares symbol */
 	return (strcmp(((symbol *)a)->str, ((symbol *)b)->str));
+}
+static int str_chk(void *item, int chk_val, size_t how_many)
+{
+	size_t i;
+	int   chk_rel = OHT_OHTER;
+	char *elem = ((symbol *)item)->str;
+	for (i = 0; i < how_many; i++) {
+		// the job here is either check the item value or
+		// set some value for later checking
+		switch (chk_val) {
+			case OHT_INIT:
+				elem = magic_val_init;
+				break;
+			case OHT_CHK:
+				chk_rel = (elem == magic_val_init) ? 
+					OHT_NIL : OHT_OHTER;
+				chk_rel = (elem == magic_val_deleted) ?
+					OHT_DELETED : chk_rel;
+				break;
+			case OHT_DEL:
+				elem = magic_val_deleted;
+				break;
+		}
+		elem++;
+	}
+	return chk_rel;
 }
 /*
 #include <stdio.h>
@@ -117,14 +147,14 @@ int main()
 	fseek(f, 0, SEEK_END);
 	size_t len = ftell(f);
 	fseek(f, 0, SEEK_SET);
-	st_init(&str_table, len, &string_hash, &str_cmp);
+	symbol_tab str_table;
+	st_init(&str_table, len, &string_hash);
 	int i;
 	symbol *sym1, *sym2;
 		sym1 = st_add_string(&str_table, s);
 		sym2 = st_add_string(&str_table, t);
 		sym1 = st_concat_string(&str_table, sym1, sym2);
 		printf("%s", sym1->str);
-	
 	putchar('\n');
 }
 */

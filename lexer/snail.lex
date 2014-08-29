@@ -6,23 +6,32 @@ extern int curr_lineno;
 static int nested_cmtl = 0;
 
 #define MAX_STR_LEN 1025
-char str_buf[MAX_STR_LEN];
+/* we alloc enough memory then 
+ * we don't need to check buffer overflow */
+extern char *str_buf;
 char *str_buf_ptr;
 int error_flag;
 extern FILE *fin;
 extern symbol_tab id_table;
 extern symbol_tab str_table;
 /* some assumptions */
-#define yylval snl_yylval
+#define yylval snail_yylval
 /* define some error flag */
 #define OVERFLOW	-1
 #define NULL_IN_STR 	-2
 #define EOF_IN_STR	-3
+#define INVALID_CH	-4
+/* TODO: 
+ * >add id_str 
+ * >change the str_buf, if we use the fsize to alloc str_buf, then we don't
+ *  need to worry about memory overflow. 
+ */
 %}
 
 %x			comment
 %x			line_comment
 %x			str
+%x			obj_str
 %x			str_bkslash
 %x			raw_str
 
@@ -38,7 +47,7 @@ TOPIC_REG		topic
 KPT_REG			kpt
 AKA_REG			AKA
 EXTERN_REG		extern
-LIST_REG		list
+FUNC_REG		list
 PROC_REG		proc
 
 WHAT_REG		what
@@ -64,15 +73,21 @@ FROM_REG		from
 ABOUT_REG		about
  /* end keywords */
 
-ASSIGN_REG		":"
-COMMA			","
+ASSIGN_EQU		":="
+ASSIGN_ADD		"+="
 DOT			"."
+TOPIC_QUOTE		"@"
 SEMI_COLON		";"
 LEFT_CURBRA		"{"
 RIGHT_CURBRA		"}"
-TOPIC_QUOTE		"@"
-EQUAL			"="
+
+UNION			"|"
+INTERSAC		"&"
+DIFF			"-"
+EQUAL			"=""="
+
 LEFT_BRA		"("
+COMMA			","
 RIGHT_BRA		")"
 %%
  /* 
@@ -97,30 +112,37 @@ RIGHT_BRA		")"
 				}
 			}
 <comment>"(*"		{	nested_cmtl++;		}
-<comment><<EOF>>	{	snl_yylval.err_msg = "EOF in comment!";
+<comment><<EOF>>	{	snail_yylval.err_msg = "EOF in comment!";
 				BEGIN (INITIAL);
 				return (ERROR);
 			}
 <comment>\n			curr_lineno++;
 <comment>.		{}	/* do nothing */
  /* outside the comment */
-"*)"			{	snl_yylval.err_msg = "Unmatched *)";
+"*)"			{	snail_yylval.err_msg = "Unmatched *)";
 				BEGIN (INITIAL);
 				return (ERROR);
 			}
  /* end of comment */
 
  /* Operations */
-{ASSIGN_REG}		{	return (':');		}
-{COMMA}			{	return (',');		}
+{ASSIGN_EQU}		{	return (ASSIGN_E);	}
+{ASSIGN_ADD}		{	return (ASSIGN_A);	}
 {DOT}			{	return ('.');		}
+{TOPIC_QUOTE}		{	return ('@');		}
+
 {SEMI_COLON}		{	return (';');		}
 {LEFT_CURBRA}		{	return ('{');		}
 {RIGHT_CURBRA}		{	return ('}');		}
-{TOPIC_QUOTE}		{	return ('@');		}
 {EQUAL}			{	return ('=');		}
+
 {LEFT_BRA}		{	return ('(');		}
+{COMMA}			{	return (',');		}
 {RIGHT_BRA}		{	return (')');		}
+
+{UNION}			{	return ('|');		}
+{INTERSAC}		{	return ('&');		}
+{DIFF}			{	return ('-');		}
 
  /* end of Operations */
 
@@ -132,7 +154,7 @@ RIGHT_BRA		")"
 {KPT_REG}		{	return (KPT);		}	
 {AKA_REG}		{	return (AKA);		}
 {EXTERN_REG}		{	return (EXTERN);	}
-{LIST_REG}		{	return (LIST);		}
+{FUNC_REG}		{	return (FUNC);		}
 {PROC_REG}		{	return (PROC);		}
 
 {WHAT_REG}		{	return (WHAT);		}
@@ -157,17 +179,55 @@ RIGHT_BRA		")"
 
  /* Keywords ends */
 
-{OBJID_REG}		{	snl_yylval.sym = st_add_string(&id_table, yytext);
+{OBJID_REG}		{	snail_yylval.sym = st_add_string(&id_table, yytext);
+				//snail_yylval.sym = st_add_string(&id_table, yytext,
+				//					strlen(yytext));
 				return (OBJECTID);
 			}
 
 {WHITESPACE}		{}
 {NEWLINE_REG}		{	curr_lineno++;		}
 
- /* 
-  * String Constant
-  * There are two kinds of string in SNL, regular and raw
-  */
+\'			{	str_buf_ptr = str_buf;
+				BEGIN(obj_str);
+			}
+<obj_str>\'		{	BEGIN (INITIAL);
+				if (error_flag)
+					return (ERROR);
+				else
+					str_buf_ptr = '\0';
+					snail_yylval.sym = 
+					st_add_string(&id_table, str_buf);
+					//str_add_string(&id_table, str_buf,
+					//		str_buf_ptr - str_buf);
+					return (OBJECTID);
+			}
+
+<obj_str><<EOF>>	{	BEGIN(INITIAL);
+				snail_yylval.err_msg = "EOF in object name";
+				return (ERROR);
+			}
+
+<obj_str>\0		{	snail_yylval.err_msg = "id costains null characters.";
+				error_flag = NULL_IN_STR;
+			}
+<obj_str>\n		{	BEGIN(INITIAL);
+				if (error_flag) ;
+				else 
+					snail_yylval.err_msg = "Unterminated id name.";
+				curr_lineno++;
+				return (ERROR);
+			}
+<obj_str>[a-zA-Z0-9\ ]	{
+				*str_buf_ptr++ = *yytext;
+			}
+ /* all the other charactors is invalid */
+<obj_str>.		{	error_flag = INVALID_CH; 	}
+
+ /* TODO: finish raw string */
+ /*************** raw string scanner start *********************/
+
+ /*************** string scanner start *************************/
 \"			{	str_buf_ptr = str_buf;
 				BEGIN(str);
 			}
@@ -175,34 +235,27 @@ RIGHT_BRA		")"
 <str>\"			{	BEGIN(INITIAL);
 				if (error_flag)
 					return (ERROR);
-				if ((str_buf_ptr - str_buf) > 1024) {
-					snl_yylval.err_msg = "String \
-constant too long";
-					str_buf[1024] = '\0';
-					return (ERROR);
-				}
+
 				else {
 					*str_buf_ptr = '\0';
-					snl_yylval.sym = 
+					snail_yylval.sym = 
 					st_add_string(&str_table, str_buf);
+					//str_add_string(&str_table, str_buf,
+					//		str_buf_ptr - str_buf);
 					return (STR_CONST);
 				}
 
 			}
 <str><<EOF>>		{	BEGIN(INITIAL);
-				snl_yylval.err_msg = "EOF in string constant";
+				snail_yylval.err_msg = "EOF in string constant";
 				return (ERROR);
 			}
-<str>\0			{	snl_yylval.err_msg = "String costains null "
+<str>\0			{	snail_yylval.err_msg = "String costains null "
 				"characters.";
 				error_flag = NULL_IN_STR;
 			}
 <str>\n			{	BEGIN(INITIAL);
-				if (error_flag) ;
-				else {
-					snl_yylval.err_msg = "Unterminated "
-					"string constant.";
-				}
+				snail_yylval.err_msg = "Unterminated string constant.";
 				curr_lineno++;
 				return (ERROR);
 			}
@@ -238,13 +291,13 @@ constant too long";
 				BEGIN(str);
 			}
 <str_bkslash><<EOF>>	{
-				snl_yylval.err_msg = "EOF in string "
+				snail_yylval.err_msg = "EOF in string "
 				"constant";
 				error_flag = EOF_IN_STR;
 				BEGIN(INITIAL);
 			}
 <str_bkslash>\0		{
-				snl_yylval.err_msg = "String constains "
+				snail_yylval.err_msg = "String constains "
 				"escaped null character";
 				error_flag = NULL_IN_STR;
 				BEGIN(str);
@@ -254,15 +307,17 @@ constant too long";
 				BEGIN(str);
 			}
  /* normal characters */
-<str>[^\0\\\n\"]	{
+<str>[^\0\\\n\"]+	{
 				if (error_flag) 	/*privous error */
-				;			/* if overfow? */
+				;
+				/*
 				else if (str_buf_ptr - str_buf + yyleng >
 					MAX_STR_LEN) {
-					snl_yylval.err_msg = "string "
+					snail_yylval.err_msg = "string "
 					"constant too long";
 					error_flag = OVERFLOW;
 					}
+				*/
 				else {			/* no error, copy the string */
 					int i;
 					for (i = 0; i < yyleng; i++) 
@@ -272,7 +327,7 @@ constant too long";
 
  /* String ends */
 <<EOF>>			{	yyterminate();			}
-.			{	snl_yylval.err_msg = yytext;
+.			{	snail_yylval.err_msg = yytext;
 				return (ERROR);
 			}
 %%

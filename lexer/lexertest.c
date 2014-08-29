@@ -119,11 +119,6 @@ char *token_to_string(int token)
 		case HOW:	return "HOW";		break;
 		case WHY:	return "WHY";		break;
 		case OF:	return "OF";		break;
-<<<<<<< HEAD
-		//case COMPARES:	return "COMPARES";	break;
-		//case REF:	return "REF";		break;
-=======
->>>>>>> parser
 		case ERROR:	return "ERROR";		break;
 		case ASSIGN_E:	return ":=";		break;
 		case ASSIGN_A:  return "+=";		break;

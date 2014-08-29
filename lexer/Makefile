@@ -2,14 +2,8 @@ CC = gcc
 CFLAGS = -Wall -ggdb3
 LEX = flex
 
-<<<<<<< HEAD
-OBJS = lexertest.c  snl-lex.c stringtab.c stringtab.h snl.h snl_list.h
-INCLUDE =  -I.
-CFLAGS = -Wall -ggdb3 -finline-functions ${INCLUDE}
-=======
 LSRC = snail.lex
 LEXC = snail_lex.c
->>>>>>> parser
 
 CSRC = lexertest.c  snail_tab.c ${LEXC}
 OBJS = ${CSRC:.c=.o}

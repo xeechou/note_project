@@ -1,5 +1,6 @@
 #ifndef MISC_TYPES_H
 #define MISC_TYPES_H
+/*TODO: add a copy function, memcpy is not efficient enough */
 
 /***************************** stack begin ***********************************/
 typedef struct {
@@ -51,7 +52,6 @@ size_t  slots_length(const slots *s);
 void   *slots_nth(slots *s, size_t pos);
 void   *slots_insert(slots *s, const void *elemAddr);
 void    slots_replace(slots *s, const void *elemAddr, size_t pos);
-size_t  slots_getpos(slots *s, void *addr);
 void    slots_delete(slots *s, size_t pos, void **ret_addr);
 void    slots_pop(slots *s, void *ret_addr);
 
@@ -87,6 +87,9 @@ void smm_pop(smmblk *s, void *ret_addr, size_t num);
 /***************************** smmblk end *************************************/
 
 /***************************** hash begin *************************************/
+#define HT_CRE		1
+#define HT_NOC		0
+
 typedef volatile struct lhash_elem {
 	volatile struct lhash_elem *next;
 	char data[];
@@ -114,6 +117,36 @@ void lht_dispose(lhash_tab *lht);
 void *lht_lookup(lhash_tab *lht, void *elem_addr, int create);
 
 void lht_delete(lhash_tab *lht, void *elem_addr);
+
+#define OHT_NIL		0
+#define OHT_DELETED	1
+#define OHT_CHK		2
+#define OHT_INIT	3
+#define OHT_DEL		4
+#define OHT_OHTER	5
+
+typedef struct {
+	void *table;
+	size_t esize;
+	size_t log_len;
+	size_t alloc_len;
+	int (*cmp) (const void *, const void *);
+	unsigned long (* hash) (void *, size_t);
+	int (*check) (void *, int, size_t);
+	void (*cp) (void *, void *);
+	/*stack log;*/
+} ohash_tab;
+
+void 
+oht_init(ohash_tab *oht, size_t esize, size_t init_alloc, 
+		size_t (*hash) (void *, size_t), 
+		int (*cmp) (const void *, const void *),
+		int (*check) (void *, int, size_t),
+		void (*cp) (void *, void *));
+
+void oht_dispose(ohash_tab *oht);
+void *oht_lookup(ohash_tab *oht, void *elem_addr, int create);
+void oht_delete(ohash_tab *oht, void *elem_addr);
 
 /****************************** hash end **************************************/
 

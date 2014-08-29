@@ -12,24 +12,23 @@ typedef struct {
 } symbol;
 
 typedef struct {
-	lhash_tab table;
+	ohash_tab table;
 	smmblk arr;
 } symbol_tab;
 
 
 void st_init(symbol_tab *st, size_t file_size, 
-		unsigned long(* hash) (void *, size_t),
-		int (* hash_cmp) (const void *, const void *));
+		unsigned long(* hash) (void *, size_t));
+		//, int (* hash_cmp) (const void *, const void *));
+
 
 void st_dispose(symbol_tab *st);
 symbol *st_add_string(symbol_tab *st, char *str);
-symbol *single_string(symbol_tab *st, symbol *sym);
-symbol *append_string(symbol_tab *st, symbol *formal, symbol *later);
+symbol *st_concat_string(symbol_tab *st, symbol *formal, symbol *later);
 /* two extral hash function */
 unsigned long 
 string_hash(void *sym, size_t hashsize);
 unsigned long 
 symbol_hash(void *sym, size_t hashsize);
-int str_cmp(const void *, const void *);
 
 #endif /* snail_tab.h */

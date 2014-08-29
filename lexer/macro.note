@@ -1,8 +1,0 @@
-topic Macro {
-	kpt 'function macro' AKA fmacro := {
-		what += "macro that replace function names when m4 see it.";
-		when := "name is right, number of paramters is right";
-		'note' := "preprocessor will also replace function definition"
-			"when it see it";
-	};
-};

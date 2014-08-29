@@ -1,0 +1,1515 @@
+Terminals unused in grammar
+
+   PROC
+   ENUM
+   MUNE
+   ERROR
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: topics
+
+    2 topics: topic
+    3       | topics topic
+
+    4 topic: TOPIC OBJECTID '{' feature_list '}' ';'
+
+    5 feature_list: feature
+    6             | feature_list feature
+
+    7 feature: kpt
+    8        | func
+
+    9 kpt: kpt_simple ';'
+   10    | kpt_simple ':' string ';'
+   11    | kpt_simple ':' '{' attrs '}' ';'
+
+   12 kpt_simple: KPT OBJECTID
+   13           | KPT OBJECTID AKA OBJECTID
+   14           | KPT OBJECTID EXTERN OBJECTID
+   15           | KPT OBJECTID AKA OBJECTID EXTERN OBJECTID
+
+   16 id_list: OBJECTID
+   17        | id_list ',' OBJECTID
+
+   18 func: FUNC OBJECTID '(' id_list ')' '{' statements '}'
+
+   19 attrs: attr ';'
+   20      | attrs attr ';'
+
+   21 attr: attr_name
+   22     | attr_name ASSIGN_E expr
+   23     | attr_name ASSIGN_A expr
+
+   24 attr_name: WHAT
+   25          | WHEN
+   26          | HOW
+   27          | WHY
+   28          | WHERE
+   29          | WHO
+   30          | OBJECTID
+
+   31 statements: statement ';'
+   32           | statements statement ';'
+
+   33 statement: labeled_stat
+   34          | LET id_list IN expr TEL
+   35          | CASE attr_name OF labeled_stats ESAC
+   36          | RETURN expr
+
+   37 labeled_stats: labeled_stat ';'
+   38              | labeled_stats labeled_stat ';'
+
+   39 labeled_stat: navig ASSIGN_E expr
+   40             | navig ASSIGN_A expr
+
+   41 expr_list: expr
+   42          | expr_list ',' expr
+
+   43 expr: const
+   44     | block_const
+   45     | CONNECT WITH navig ABOUT expr
+   46     | CONNECT TO navig ABOUT expr
+   47     | CONNECT FROM navig ABOUT expr
+   48     | OBJECTID '(' expr_list ')'
+   49     | expr '|' expr
+   50     | expr '&' expr
+   51     | expr '-' expr
+
+   52 block_const: '{' const_list '}'
+
+   53 const_list: const ';'
+   54           | const_list const ';'
+
+   55 const: string
+   56      | navig
+
+   57 navig: OBJECTID
+   58      | OBJECTID '.' attr_name
+   59      | OBJECTID '@' OBJECTID
+   60      | OBJECTID '@' OBJECTID '.' attr_name
+
+   61 string: STR_CONST
+   62       | string STR_CONST
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'&' (38) 50
+'(' (40) 18 48
+')' (41) 18 48
+',' (44) 17 42
+'-' (45) 51
+'.' (46) 58 60
+':' (58) 10 11
+';' (59) 4 9 10 11 19 20 31 32 37 38 53 54
+'@' (64) 59 60
+ERROR (100)
+'{' (123) 4 11 18 52
+'|' (124) 49
+'}' (125) 4 11 18 52
+STR_CONST (150) 61 62
+OBJECTID (151) 4 12 13 14 15 16 17 18 30 48 57 58 59 60
+ASSIGN_E (152) 22 39
+ASSIGN_A (153) 23 40
+TOPIC (201) 4
+KPT (202) 12 13 14 15
+AKA (203) 13 15
+EXTERN (204) 14 15
+FUNC (205) 18
+PROC (206)
+WHAT (251) 24
+WHEN (252) 25
+HOW (253) 26
+WHY (254) 27
+WHERE (255) 28
+WHO (256) 29
+CASE (301) 35
+OF (302) 35
+ESAC (303) 35
+ENUM (304)
+MUNE (305)
+LET (306) 34
+IN (307) 34
+TEL (308) 34
+RETURN (309) 36
+CONNECT (351) 45 46 47
+WITH (352) 45
+TO (353) 46
+FROM (354) 47
+ABOUT (355) 45 46 47
+error (356)
+
+
+Nonterminals, with rules where they appear
+
+$accept (46)
+    on left: 0
+program (47)
+    on left: 1, on right: 0
+topics (48)
+    on left: 2 3, on right: 1 3
+topic (49)
+    on left: 4, on right: 2 3
+feature_list (50)
+    on left: 5 6, on right: 4 6
+feature (51)
+    on left: 7 8, on right: 5 6
+kpt (52)
+    on left: 9 10 11, on right: 7
+kpt_simple (53)
+    on left: 12 13 14 15, on right: 9 10 11
+id_list (54)
+    on left: 16 17, on right: 17 18 34
+func (55)
+    on left: 18, on right: 8
+attrs (56)
+    on left: 19 20, on right: 11 20
+attr (57)
+    on left: 21 22 23, on right: 19 20
+attr_name (58)
+    on left: 24 25 26 27 28 29 30, on right: 21 22 23 35 58 60
+statements (59)
+    on left: 31 32, on right: 18 32
+statement (60)
+    on left: 33 34 35 36, on right: 31 32
+labeled_stats (61)
+    on left: 37 38, on right: 35 38
+labeled_stat (62)
+    on left: 39 40, on right: 33 37 38
+expr_list (63)
+    on left: 41 42, on right: 42 48
+expr (64)
+    on left: 43 44 45 46 47 48 49 50 51, on right: 22 23 34 36 39 40
+    41 42 45 46 47 49 50 51
+block_const (65)
+    on left: 52, on right: 44
+const_list (66)
+    on left: 53 54, on right: 52 54
+const (67)
+    on left: 55 56, on right: 43 53 54
+navig (68)
+    on left: 57 58 59 60, on right: 39 40 45 46 47 56
+string (69)
+    on left: 61 62, on right: 10 55 62
+
+
+State 0
+
+    0 $accept: . program $end
+
+    TOPIC  shift, and go to state 1
+
+    program  go to state 2
+    topics   go to state 3
+    topic    go to state 4
+
+
+State 1
+
+    4 topic: TOPIC . OBJECTID '{' feature_list '}' ';'
+
+    OBJECTID  shift, and go to state 5
+
+
+State 2
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 6
+
+
+State 3
+
+    1 program: topics .
+    3 topics: topics . topic
+
+    TOPIC  shift, and go to state 1
+
+    $default  reduce using rule 1 (program)
+
+    topic  go to state 7
+
+
+State 4
+
+    2 topics: topic .
+
+    $default  reduce using rule 2 (topics)
+
+
+State 5
+
+    4 topic: TOPIC OBJECTID . '{' feature_list '}' ';'
+
+    '{'  shift, and go to state 8
+
+
+State 6
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 7
+
+    3 topics: topics topic .
+
+    $default  reduce using rule 3 (topics)
+
+
+State 8
+
+    4 topic: TOPIC OBJECTID '{' . feature_list '}' ';'
+
+    KPT   shift, and go to state 9
+    FUNC  shift, and go to state 10
+
+    feature_list  go to state 11
+    feature       go to state 12
+    kpt           go to state 13
+    kpt_simple    go to state 14
+    func          go to state 15
+
+
+State 9
+
+   12 kpt_simple: KPT . OBJECTID
+   13           | KPT . OBJECTID AKA OBJECTID
+   14           | KPT . OBJECTID EXTERN OBJECTID
+   15           | KPT . OBJECTID AKA OBJECTID EXTERN OBJECTID
+
+    OBJECTID  shift, and go to state 16
+
+
+State 10
+
+   18 func: FUNC . OBJECTID '(' id_list ')' '{' statements '}'
+
+    OBJECTID  shift, and go to state 17
+
+
+State 11
+
+    4 topic: TOPIC OBJECTID '{' feature_list . '}' ';'
+    6 feature_list: feature_list . feature
+
+    KPT   shift, and go to state 9
+    FUNC  shift, and go to state 10
+    '}'   shift, and go to state 18
+
+    feature     go to state 19
+    kpt         go to state 13
+    kpt_simple  go to state 14
+    func        go to state 15
+
+
+State 12
+
+    5 feature_list: feature .
+
+    $default  reduce using rule 5 (feature_list)
+
+
+State 13
+
+    7 feature: kpt .
+
+    $default  reduce using rule 7 (feature)
+
+
+State 14
+
+    9 kpt: kpt_simple . ';'
+   10    | kpt_simple . ':' string ';'
+   11    | kpt_simple . ':' '{' attrs '}' ';'
+
+    ';'  shift, and go to state 20
+    ':'  shift, and go to state 21
+
+
+State 15
+
+    8 feature: func .
+
+    $default  reduce using rule 8 (feature)
+
+
+State 16
+
+   12 kpt_simple: KPT OBJECTID .
+   13           | KPT OBJECTID . AKA OBJECTID
+   14           | KPT OBJECTID . EXTERN OBJECTID
+   15           | KPT OBJECTID . AKA OBJECTID EXTERN OBJECTID
+
+    AKA     shift, and go to state 22
+    EXTERN  shift, and go to state 23
+
+    $default  reduce using rule 12 (kpt_simple)
+
+
+State 17
+
+   18 func: FUNC OBJECTID . '(' id_list ')' '{' statements '}'
+
+    '('  shift, and go to state 24
+
+
+State 18
+
+    4 topic: TOPIC OBJECTID '{' feature_list '}' . ';'
+
+    ';'  shift, and go to state 25
+
+
+State 19
+
+    6 feature_list: feature_list feature .
+
+    $default  reduce using rule 6 (feature_list)
+
+
+State 20
+
+    9 kpt: kpt_simple ';' .
+
+    $default  reduce using rule 9 (kpt)
+
+
+State 21
+
+   10 kpt: kpt_simple ':' . string ';'
+   11    | kpt_simple ':' . '{' attrs '}' ';'
+
+    STR_CONST  shift, and go to state 26
+    '{'        shift, and go to state 27
+
+    string  go to state 28
+
+
+State 22
+
+   13 kpt_simple: KPT OBJECTID AKA . OBJECTID
+   15           | KPT OBJECTID AKA . OBJECTID EXTERN OBJECTID
+
+    OBJECTID  shift, and go to state 29
+
+
+State 23
+
+   14 kpt_simple: KPT OBJECTID EXTERN . OBJECTID
+
+    OBJECTID  shift, and go to state 30
+
+
+State 24
+
+   18 func: FUNC OBJECTID '(' . id_list ')' '{' statements '}'
+
+    OBJECTID  shift, and go to state 31
+
+    id_list  go to state 32
+
+
+State 25
+
+    4 topic: TOPIC OBJECTID '{' feature_list '}' ';' .
+
+    $default  reduce using rule 4 (topic)
+
+
+State 26
+
+   61 string: STR_CONST .
+
+    $default  reduce using rule 61 (string)
+
+
+State 27
+
+   11 kpt: kpt_simple ':' '{' . attrs '}' ';'
+
+    WHAT      shift, and go to state 33
+    WHEN      shift, and go to state 34
+    HOW       shift, and go to state 35
+    WHY       shift, and go to state 36
+    WHERE     shift, and go to state 37
+    WHO       shift, and go to state 38
+    OBJECTID  shift, and go to state 39
+
+    attrs      go to state 40
+    attr       go to state 41
+    attr_name  go to state 42
+
+
+State 28
+
+   10 kpt: kpt_simple ':' string . ';'
+   62 string: string . STR_CONST
+
+    STR_CONST  shift, and go to state 43
+    ';'        shift, and go to state 44
+
+
+State 29
+
+   13 kpt_simple: KPT OBJECTID AKA OBJECTID .
+   15           | KPT OBJECTID AKA OBJECTID . EXTERN OBJECTID
+
+    EXTERN  shift, and go to state 45
+
+    $default  reduce using rule 13 (kpt_simple)
+
+
+State 30
+
+   14 kpt_simple: KPT OBJECTID EXTERN OBJECTID .
+
+    $default  reduce using rule 14 (kpt_simple)
+
+
+State 31
+
+   16 id_list: OBJECTID .
+
+    $default  reduce using rule 16 (id_list)
+
+
+State 32
+
+   17 id_list: id_list . ',' OBJECTID
+   18 func: FUNC OBJECTID '(' id_list . ')' '{' statements '}'
+
+    ','  shift, and go to state 46
+    ')'  shift, and go to state 47
+
+
+State 33
+
+   24 attr_name: WHAT .
+
+    $default  reduce using rule 24 (attr_name)
+
+
+State 34
+
+   25 attr_name: WHEN .
+
+    $default  reduce using rule 25 (attr_name)
+
+
+State 35
+
+   26 attr_name: HOW .
+
+    $default  reduce using rule 26 (attr_name)
+
+
+State 36
+
+   27 attr_name: WHY .
+
+    $default  reduce using rule 27 (attr_name)
+
+
+State 37
+
+   28 attr_name: WHERE .
+
+    $default  reduce using rule 28 (attr_name)
+
+
+State 38
+
+   29 attr_name: WHO .
+
+    $default  reduce using rule 29 (attr_name)
+
+
+State 39
+
+   30 attr_name: OBJECTID .
+
+    $default  reduce using rule 30 (attr_name)
+
+
+State 40
+
+   11 kpt: kpt_simple ':' '{' attrs . '}' ';'
+   20 attrs: attrs . attr ';'
+
+    WHAT      shift, and go to state 33
+    WHEN      shift, and go to state 34
+    HOW       shift, and go to state 35
+    WHY       shift, and go to state 36
+    WHERE     shift, and go to state 37
+    WHO       shift, and go to state 38
+    OBJECTID  shift, and go to state 39
+    '}'       shift, and go to state 48
+
+    attr       go to state 49
+    attr_name  go to state 42
+
+
+State 41
+
+   19 attrs: attr . ';'
+
+    ';'  shift, and go to state 50
+
+
+State 42
+
+   21 attr: attr_name .
+   22     | attr_name . ASSIGN_E expr
+   23     | attr_name . ASSIGN_A expr
+
+    ASSIGN_E  shift, and go to state 51
+    ASSIGN_A  shift, and go to state 52
+
+    $default  reduce using rule 21 (attr)
+
+
+State 43
+
+   62 string: string STR_CONST .
+
+    $default  reduce using rule 62 (string)
+
+
+State 44
+
+   10 kpt: kpt_simple ':' string ';' .
+
+    $default  reduce using rule 10 (kpt)
+
+
+State 45
+
+   15 kpt_simple: KPT OBJECTID AKA OBJECTID EXTERN . OBJECTID
+
+    OBJECTID  shift, and go to state 53
+
+
+State 46
+
+   17 id_list: id_list ',' . OBJECTID
+
+    OBJECTID  shift, and go to state 54
+
+
+State 47
+
+   18 func: FUNC OBJECTID '(' id_list ')' . '{' statements '}'
+
+    '{'  shift, and go to state 55
+
+
+State 48
+
+   11 kpt: kpt_simple ':' '{' attrs '}' . ';'
+
+    ';'  shift, and go to state 56
+
+
+State 49
+
+   20 attrs: attrs attr . ';'
+
+    ';'  shift, and go to state 57
+
+
+State 50
+
+   19 attrs: attr ';' .
+
+    $default  reduce using rule 19 (attrs)
+
+
+State 51
+
+   22 attr: attr_name ASSIGN_E . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 61
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 52
+
+   23 attr: attr_name ASSIGN_A . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 66
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 53
+
+   15 kpt_simple: KPT OBJECTID AKA OBJECTID EXTERN OBJECTID .
+
+    $default  reduce using rule 15 (kpt_simple)
+
+
+State 54
+
+   17 id_list: id_list ',' OBJECTID .
+
+    $default  reduce using rule 17 (id_list)
+
+
+State 55
+
+   18 func: FUNC OBJECTID '(' id_list ')' '{' . statements '}'
+
+    CASE      shift, and go to state 67
+    LET       shift, and go to state 68
+    RETURN    shift, and go to state 69
+    OBJECTID  shift, and go to state 70
+
+    statements    go to state 71
+    statement     go to state 72
+    labeled_stat  go to state 73
+    navig         go to state 74
+
+
+State 56
+
+   11 kpt: kpt_simple ':' '{' attrs '}' ';' .
+
+    $default  reduce using rule 11 (kpt)
+
+
+State 57
+
+   20 attrs: attrs attr ';' .
+
+    $default  reduce using rule 20 (attrs)
+
+
+State 58
+
+   45 expr: CONNECT . WITH navig ABOUT expr
+   46     | CONNECT . TO navig ABOUT expr
+   47     | CONNECT . FROM navig ABOUT expr
+
+    WITH  shift, and go to state 75
+    TO    shift, and go to state 76
+    FROM  shift, and go to state 77
+
+
+State 59
+
+   48 expr: OBJECTID . '(' expr_list ')'
+   57 navig: OBJECTID .
+   58      | OBJECTID . '.' attr_name
+   59      | OBJECTID . '@' OBJECTID
+   60      | OBJECTID . '@' OBJECTID '.' attr_name
+
+    '('  shift, and go to state 78
+    '.'  shift, and go to state 79
+    '@'  shift, and go to state 80
+
+    $default  reduce using rule 57 (navig)
+
+
+State 60
+
+   52 block_const: '{' . const_list '}'
+
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 70
+
+    const_list  go to state 81
+    const       go to state 82
+    navig       go to state 64
+    string      go to state 65
+
+
+State 61
+
+   22 attr: attr_name ASSIGN_E expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 22 (attr)
+
+
+State 62
+
+   44 expr: block_const .
+
+    $default  reduce using rule 44 (expr)
+
+
+State 63
+
+   43 expr: const .
+
+    $default  reduce using rule 43 (expr)
+
+
+State 64
+
+   56 const: navig .
+
+    $default  reduce using rule 56 (const)
+
+
+State 65
+
+   55 const: string .
+   62 string: string . STR_CONST
+
+    STR_CONST  shift, and go to state 43
+
+    $default  reduce using rule 55 (const)
+
+
+State 66
+
+   23 attr: attr_name ASSIGN_A expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 23 (attr)
+
+
+State 67
+
+   35 statement: CASE . attr_name OF labeled_stats ESAC
+
+    WHAT      shift, and go to state 33
+    WHEN      shift, and go to state 34
+    HOW       shift, and go to state 35
+    WHY       shift, and go to state 36
+    WHERE     shift, and go to state 37
+    WHO       shift, and go to state 38
+    OBJECTID  shift, and go to state 39
+
+    attr_name  go to state 86
+
+
+State 68
+
+   34 statement: LET . id_list IN expr TEL
+
+    OBJECTID  shift, and go to state 31
+
+    id_list  go to state 87
+
+
+State 69
+
+   36 statement: RETURN . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 88
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 70
+
+   57 navig: OBJECTID .
+   58      | OBJECTID . '.' attr_name
+   59      | OBJECTID . '@' OBJECTID
+   60      | OBJECTID . '@' OBJECTID '.' attr_name
+
+    '.'  shift, and go to state 79
+    '@'  shift, and go to state 80
+
+    $default  reduce using rule 57 (navig)
+
+
+State 71
+
+   18 func: FUNC OBJECTID '(' id_list ')' '{' statements . '}'
+   32 statements: statements . statement ';'
+
+    CASE      shift, and go to state 67
+    LET       shift, and go to state 68
+    RETURN    shift, and go to state 69
+    OBJECTID  shift, and go to state 70
+    '}'       shift, and go to state 89
+
+    statement     go to state 90
+    labeled_stat  go to state 73
+    navig         go to state 74
+
+
+State 72
+
+   31 statements: statement . ';'
+
+    ';'  shift, and go to state 91
+
+
+State 73
+
+   33 statement: labeled_stat .
+
+    $default  reduce using rule 33 (statement)
+
+
+State 74
+
+   39 labeled_stat: navig . ASSIGN_E expr
+   40             | navig . ASSIGN_A expr
+
+    ASSIGN_E  shift, and go to state 92
+    ASSIGN_A  shift, and go to state 93
+
+
+State 75
+
+   45 expr: CONNECT WITH . navig ABOUT expr
+
+    OBJECTID  shift, and go to state 70
+
+    navig  go to state 94
+
+
+State 76
+
+   46 expr: CONNECT TO . navig ABOUT expr
+
+    OBJECTID  shift, and go to state 70
+
+    navig  go to state 95
+
+
+State 77
+
+   47 expr: CONNECT FROM . navig ABOUT expr
+
+    OBJECTID  shift, and go to state 70
+
+    navig  go to state 96
+
+
+State 78
+
+   48 expr: OBJECTID '(' . expr_list ')'
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr_list    go to state 97
+    expr         go to state 98
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 79
+
+   58 navig: OBJECTID '.' . attr_name
+
+    WHAT      shift, and go to state 33
+    WHEN      shift, and go to state 34
+    HOW       shift, and go to state 35
+    WHY       shift, and go to state 36
+    WHERE     shift, and go to state 37
+    WHO       shift, and go to state 38
+    OBJECTID  shift, and go to state 39
+
+    attr_name  go to state 99
+
+
+State 80
+
+   59 navig: OBJECTID '@' . OBJECTID
+   60      | OBJECTID '@' . OBJECTID '.' attr_name
+
+    OBJECTID  shift, and go to state 100
+
+
+State 81
+
+   52 block_const: '{' const_list . '}'
+   54 const_list: const_list . const ';'
+
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 70
+    '}'        shift, and go to state 101
+
+    const   go to state 102
+    navig   go to state 64
+    string  go to state 65
+
+
+State 82
+
+   53 const_list: const . ';'
+
+    ';'  shift, and go to state 103
+
+
+State 83
+
+   51 expr: expr '-' . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 104
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 84
+
+   49 expr: expr '|' . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 105
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 85
+
+   50 expr: expr '&' . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 106
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 86
+
+   35 statement: CASE attr_name . OF labeled_stats ESAC
+
+    OF  shift, and go to state 107
+
+
+State 87
+
+   17 id_list: id_list . ',' OBJECTID
+   34 statement: LET id_list . IN expr TEL
+
+    IN   shift, and go to state 108
+    ','  shift, and go to state 46
+
+
+State 88
+
+   36 statement: RETURN expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 36 (statement)
+
+
+State 89
+
+   18 func: FUNC OBJECTID '(' id_list ')' '{' statements '}' .
+
+    $default  reduce using rule 18 (func)
+
+
+State 90
+
+   32 statements: statements statement . ';'
+
+    ';'  shift, and go to state 109
+
+
+State 91
+
+   31 statements: statement ';' .
+
+    $default  reduce using rule 31 (statements)
+
+
+State 92
+
+   39 labeled_stat: navig ASSIGN_E . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 110
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 93
+
+   40 labeled_stat: navig ASSIGN_A . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 111
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 94
+
+   45 expr: CONNECT WITH navig . ABOUT expr
+
+    ABOUT  shift, and go to state 112
+
+
+State 95
+
+   46 expr: CONNECT TO navig . ABOUT expr
+
+    ABOUT  shift, and go to state 113
+
+
+State 96
+
+   47 expr: CONNECT FROM navig . ABOUT expr
+
+    ABOUT  shift, and go to state 114
+
+
+State 97
+
+   42 expr_list: expr_list . ',' expr
+   48 expr: OBJECTID '(' expr_list . ')'
+
+    ','  shift, and go to state 115
+    ')'  shift, and go to state 116
+
+
+State 98
+
+   41 expr_list: expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 41 (expr_list)
+
+
+State 99
+
+   58 navig: OBJECTID '.' attr_name .
+
+    $default  reduce using rule 58 (navig)
+
+
+State 100
+
+   59 navig: OBJECTID '@' OBJECTID .
+   60      | OBJECTID '@' OBJECTID . '.' attr_name
+
+    '.'  shift, and go to state 117
+
+    $default  reduce using rule 59 (navig)
+
+
+State 101
+
+   52 block_const: '{' const_list '}' .
+
+    $default  reduce using rule 52 (block_const)
+
+
+State 102
+
+   54 const_list: const_list const . ';'
+
+    ';'  shift, and go to state 118
+
+
+State 103
+
+   53 const_list: const ';' .
+
+    $default  reduce using rule 53 (const_list)
+
+
+State 104
+
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+   51     | expr '-' expr .
+
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 51 (expr)
+
+
+State 105
+
+   49 expr: expr . '|' expr
+   49     | expr '|' expr .
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    $default  reduce using rule 49 (expr)
+
+
+State 106
+
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   50     | expr '&' expr .
+   51     | expr . '-' expr
+
+    $default  reduce using rule 50 (expr)
+
+
+State 107
+
+   35 statement: CASE attr_name OF . labeled_stats ESAC
+
+    OBJECTID  shift, and go to state 70
+
+    labeled_stats  go to state 119
+    labeled_stat   go to state 120
+    navig          go to state 74
+
+
+State 108
+
+   34 statement: LET id_list IN . expr TEL
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 121
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 109
+
+   32 statements: statements statement ';' .
+
+    $default  reduce using rule 32 (statements)
+
+
+State 110
+
+   39 labeled_stat: navig ASSIGN_E expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 39 (labeled_stat)
+
+
+State 111
+
+   40 labeled_stat: navig ASSIGN_A expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 40 (labeled_stat)
+
+
+State 112
+
+   45 expr: CONNECT WITH navig ABOUT . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 122
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 113
+
+   46 expr: CONNECT TO navig ABOUT . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 123
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 114
+
+   47 expr: CONNECT FROM navig ABOUT . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 124
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 115
+
+   42 expr_list: expr_list ',' . expr
+
+    CONNECT    shift, and go to state 58
+    STR_CONST  shift, and go to state 26
+    OBJECTID   shift, and go to state 59
+    '{'        shift, and go to state 60
+
+    expr         go to state 125
+    block_const  go to state 62
+    const        go to state 63
+    navig        go to state 64
+    string       go to state 65
+
+
+State 116
+
+   48 expr: OBJECTID '(' expr_list ')' .
+
+    $default  reduce using rule 48 (expr)
+
+
+State 117
+
+   60 navig: OBJECTID '@' OBJECTID '.' . attr_name
+
+    WHAT      shift, and go to state 33
+    WHEN      shift, and go to state 34
+    HOW       shift, and go to state 35
+    WHY       shift, and go to state 36
+    WHERE     shift, and go to state 37
+    WHO       shift, and go to state 38
+    OBJECTID  shift, and go to state 39
+
+    attr_name  go to state 126
+
+
+State 118
+
+   54 const_list: const_list const ';' .
+
+    $default  reduce using rule 54 (const_list)
+
+
+State 119
+
+   35 statement: CASE attr_name OF labeled_stats . ESAC
+   38 labeled_stats: labeled_stats . labeled_stat ';'
+
+    ESAC      shift, and go to state 127
+    OBJECTID  shift, and go to state 70
+
+    labeled_stat  go to state 128
+    navig         go to state 74
+
+
+State 120
+
+   37 labeled_stats: labeled_stat . ';'
+
+    ';'  shift, and go to state 129
+
+
+State 121
+
+   34 statement: LET id_list IN expr . TEL
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    TEL  shift, and go to state 130
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+
+State 122
+
+   45 expr: CONNECT WITH navig ABOUT expr .
+   49     | expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 45 (expr)
+
+
+State 123
+
+   46 expr: CONNECT TO navig ABOUT expr .
+   49     | expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 46 (expr)
+
+
+State 124
+
+   47 expr: CONNECT FROM navig ABOUT expr .
+   49     | expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 47 (expr)
+
+
+State 125
+
+   42 expr_list: expr_list ',' expr .
+   49 expr: expr . '|' expr
+   50     | expr . '&' expr
+   51     | expr . '-' expr
+
+    '-'  shift, and go to state 83
+    '|'  shift, and go to state 84
+    '&'  shift, and go to state 85
+
+    $default  reduce using rule 42 (expr_list)
+
+
+State 126
+
+   60 navig: OBJECTID '@' OBJECTID '.' attr_name .
+
+    $default  reduce using rule 60 (navig)
+
+
+State 127
+
+   35 statement: CASE attr_name OF labeled_stats ESAC .
+
+    $default  reduce using rule 35 (statement)
+
+
+State 128
+
+   38 labeled_stats: labeled_stats labeled_stat . ';'
+
+    ';'  shift, and go to state 131
+
+
+State 129
+
+   37 labeled_stats: labeled_stat ';' .
+
+    $default  reduce using rule 37 (labeled_stats)
+
+
+State 130
+
+   34 statement: LET id_list IN expr TEL .
+
+    $default  reduce using rule 34 (statement)
+
+
+State 131
+
+   38 labeled_stats: labeled_stats labeled_stat ';' .
+
+    $default  reduce using rule 38 (labeled_stats)

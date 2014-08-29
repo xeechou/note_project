@@ -1,0 +1,190 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BEGIN	snail-lex.c	126;"	d	file:
+ECHO	snail-lex.c	670;"	d	file:
+EOB_ACT_CONTINUE_SCAN	snail-lex.c	166;"	d	file:
+EOB_ACT_END_OF_FILE	snail-lex.c	167;"	d	file:
+EOB_ACT_LAST_MATCH	snail-lex.c	168;"	d	file:
+EOF_IN_STR	snail-lex.c	566;"	d	file:
+FLEXINT_H	snail-lex.c	30;"	d	file:
+FLEX_BETA	snail-lex.c	14;"	d	file:
+FLEX_SCANNER	snail-lex.c	9;"	d	file:
+INITIAL	snail-lex.c	578;"	d	file:
+INT16_MAX	snail-lex.c	72;"	d	file:
+INT16_MIN	snail-lex.c	63;"	d	file:
+INT32_MAX	snail-lex.c	75;"	d	file:
+INT32_MIN	snail-lex.c	66;"	d	file:
+INT8_MAX	snail-lex.c	69;"	d	file:
+INT8_MIN	snail-lex.c	60;"	d	file:
+MAX_STR_LEN	snail-lex.c	554;"	d	file:
+NULL_IN_STR	snail-lex.c	565;"	d	file:
+OVERFLOW	snail-lex.c	564;"	d	file:
+REJECT	snail-lex.c	541;"	d	file:
+UINT16_MAX	snail-lex.c	81;"	d	file:
+UINT32_MAX	snail-lex.c	84;"	d	file:
+UINT8_MAX	snail-lex.c	78;"	d	file:
+YYSTATE	snail-lex.c	133;"	d	file:
+YYTABLES_NAME	snail-lex.c	2294;"	d	file:
+YY_AT_BOL	snail-lex.c	333;"	d	file:
+YY_BREAK	snail-lex.c	749;"	d	file:
+YY_BUFFER_EOF_PENDING	snail-lex.c	249;"	d	file:
+YY_BUFFER_NEW	snail-lex.c	237;"	d	file:
+YY_BUFFER_NORMAL	snail-lex.c	238;"	d	file:
+YY_BUFFER_STATE	snail-lex.c	/^typedef struct yy_buffer_state *YY_BUFFER_STATE;$/;"	t	typeref:struct:yy_buffer_state	file:
+YY_BUF_SIZE	snail-lex.c	145;"	d	file:
+YY_CHAR	snail-lex.c	/^typedef unsigned char YY_CHAR;$/;"	t	file:
+YY_CURRENT_BUFFER	snail-lex.c	265;"	d	file:
+YY_CURRENT_BUFFER_LVALUE	snail-lex.c	272;"	d	file:
+YY_DECL	snail-lex.c	737;"	d	file:
+YY_DECL_IS_OURS	snail-lex.c	733;"	d	file:
+YY_DO_BEFORE_ACTION	snail-lex.c	361;"	d	file:
+YY_END_OF_BUFFER	snail-lex.c	369;"	d	file:
+YY_END_OF_BUFFER_CHAR	snail-lex.c	141;"	d	file:
+YY_EXIT_FAILURE	snail-lex.c	2092;"	d	file:
+YY_EXTRA_TYPE	snail-lex.c	594;"	d	file:
+YY_FATAL_ERROR	snail-lex.c	724;"	d	file:
+YY_FLEX_MAJOR_VERSION	snail-lex.c	10;"	d	file:
+YY_FLEX_MINOR_VERSION	snail-lex.c	11;"	d	file:
+YY_FLEX_SUBMINOR_VERSION	snail-lex.c	12;"	d	file:
+YY_FLUSH_BUFFER	snail-lex.c	301;"	d	file:
+YY_INPUT	snail-lex.c	677;"	d	file:
+YY_INT_ALIGNED	snail-lex.c	5;"	d	file:
+YY_LESS_LINENO	snail-lex.c	170;"	d	file:
+YY_LINENO_REWIND_TO	snail-lex.c	171;"	d	file:
+YY_MORE_ADJ	snail-lex.c	543;"	d	file:
+YY_NEW_FILE	snail-lex.c	139;"	d	file:
+YY_NULL	snail-lex.c	113;"	d	file:
+YY_NUM_RULES	snail-lex.c	368;"	d	file:
+YY_READ_BUF_SIZE	snail-lex.c	662;"	d	file:
+YY_RESTORE_YY_MORE_OFFSET	snail-lex.c	544;"	d	file:
+YY_RULE_SETUP	snail-lex.c	752;"	d	file:
+YY_SC_TO_UI	snail-lex.c	120;"	d	file:
+YY_SKIP_YYWRAP	snail-lex.c	338;"	d	file:
+YY_START	snail-lex.c	132;"	d	file:
+YY_START_STACK_INCR	snail-lex.c	719;"	d	file:
+YY_STATE_BUF_SIZE	snail-lex.c	150;"	d	file:
+YY_STATE_EOF	snail-lex.c	136;"	d	file:
+YY_STRUCT_YY_BUFFER_STATE	snail-lex.c	190;"	d	file:
+YY_TYPEDEF_YY_BUFFER_STATE	snail-lex.c	153;"	d	file:
+YY_TYPEDEF_YY_SIZE_T	snail-lex.c	158;"	d	file:
+YY_USER_ACTION	snail-lex.c	744;"	d	file:
+YY_USE_CONST	snail-lex.c	101;"	d	file:
+YY_USE_CONST	snail-lex.c	94;"	d	file:
+__STDC_LIMIT_MACROS	snail-lex.c	40;"	d	file:
+comment	snail-lex.c	579;"	d	file:
+error_flag	snail-lex.c	/^int error_flag;$/;"	v
+flex_int16_t	snail-lex.c	/^typedef int16_t flex_int16_t;$/;"	t	file:
+flex_int16_t	snail-lex.c	/^typedef short int flex_int16_t;$/;"	t	file:
+flex_int32_t	snail-lex.c	/^typedef int flex_int32_t;$/;"	t	file:
+flex_int32_t	snail-lex.c	/^typedef int32_t flex_int32_t;$/;"	t	file:
+flex_int8_t	snail-lex.c	/^typedef int8_t flex_int8_t;$/;"	t	file:
+flex_int8_t	snail-lex.c	/^typedef signed char flex_int8_t;$/;"	t	file:
+flex_uint16_t	snail-lex.c	/^typedef uint16_t flex_uint16_t;$/;"	t	file:
+flex_uint16_t	snail-lex.c	/^typedef unsigned short int flex_uint16_t;$/;"	t	file:
+flex_uint32_t	snail-lex.c	/^typedef uint32_t flex_uint32_t;$/;"	t	file:
+flex_uint32_t	snail-lex.c	/^typedef unsigned int flex_uint32_t;$/;"	t	file:
+flex_uint8_t	snail-lex.c	/^typedef uint8_t flex_uint8_t;$/;"	t	file:
+flex_uint8_t	snail-lex.c	/^typedef unsigned char flex_uint8_t; $/;"	t	file:
+line_comment	snail-lex.c	580;"	d	file:
+nested_cmtl	snail-lex.c	/^static int nested_cmtl = 0;$/;"	v	file:
+raw_str	snail-lex.c	583;"	d	file:
+str	snail-lex.c	581;"	d	file:
+str_bkslash	snail-lex.c	582;"	d	file:
+str_buf	snail-lex.c	/^char str_buf[MAX_STR_LEN];$/;"	v
+str_buf_ptr	snail-lex.c	/^char *str_buf_ptr;$/;"	v
+unput	snail-lex.c	187;"	d	file:
+yy_accept	snail-lex.c	/^static yyconst flex_int16_t yy_accept[130] =$/;"	v	file:
+yy_at_bol	snail-lex.c	/^	int yy_at_bol;$/;"	m	struct:yy_buffer_state	file:
+yy_base	snail-lex.c	/^static yyconst flex_int16_t yy_base[136] =$/;"	v	file:
+yy_bs_column	snail-lex.c	/^    int yy_bs_column; \/**< The column count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_bs_lineno	snail-lex.c	/^    int yy_bs_lineno; \/**< The line count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_pos	snail-lex.c	/^	char *yy_buf_pos;		\/* current position in input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_size	snail-lex.c	/^	yy_size_t yy_buf_size;$/;"	m	struct:yy_buffer_state	file:
+yy_buffer_stack	snail-lex.c	/^static YY_BUFFER_STATE * yy_buffer_stack = 0; \/**< Stack as an array. *\/$/;"	v	file:
+yy_buffer_stack_max	snail-lex.c	/^static size_t yy_buffer_stack_max = 0; \/**< capacity of stack. *\/$/;"	v	file:
+yy_buffer_stack_top	snail-lex.c	/^static size_t yy_buffer_stack_top = 0; \/**< index of top of stack. *\/$/;"	v	file:
+yy_buffer_state	snail-lex.c	/^struct yy_buffer_state$/;"	s	file:
+yy_buffer_status	snail-lex.c	/^	int yy_buffer_status;$/;"	m	struct:yy_buffer_state	file:
+yy_c_buf_p	snail-lex.c	/^static char *yy_c_buf_p = (char *) 0;$/;"	v	file:
+yy_ch_buf	snail-lex.c	/^	char *yy_ch_buf;		\/* input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_chk	snail-lex.c	/^static yyconst flex_int16_t yy_chk[225] =$/;"	v	file:
+yy_create_buffer	snail-lex.c	/^    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )$/;"	f
+yy_def	snail-lex.c	/^static yyconst flex_int16_t yy_def[136] =$/;"	v	file:
+yy_delete_buffer	snail-lex.c	/^    void yy_delete_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_did_buffer_switch_on_eof	snail-lex.c	/^static int yy_did_buffer_switch_on_eof;$/;"	v	file:
+yy_ec	snail-lex.c	/^static yyconst flex_int32_t yy_ec[256] =$/;"	v	file:
+yy_fatal_error	snail-lex.c	/^static void yy_fatal_error (yyconst char* msg )$/;"	f	file:
+yy_fill_buffer	snail-lex.c	/^	int yy_fill_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_flex_debug	snail-lex.c	/^int yy_flex_debug = 0;$/;"	v
+yy_flex_strlen	snail-lex.c	/^static int yy_flex_strlen (yyconst char * s )$/;"	f	file:
+yy_flex_strncpy	snail-lex.c	/^static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )$/;"	f	file:
+yy_flush_buffer	snail-lex.c	/^    void yy_flush_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_get_next_buffer	snail-lex.c	/^static int yy_get_next_buffer (void)$/;"	f	file:
+yy_get_previous_state	snail-lex.c	/^    static yy_state_type yy_get_previous_state (void)$/;"	f	file:
+yy_hold_char	snail-lex.c	/^static char yy_hold_char;$/;"	v	file:
+yy_init	snail-lex.c	/^static int yy_init = 0;		\/* whether we need to initialize *\/$/;"	v	file:
+yy_init_buffer	snail-lex.c	/^    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )$/;"	f	file:
+yy_init_globals	snail-lex.c	/^static int yy_init_globals (void)$/;"	f	file:
+yy_input_file	snail-lex.c	/^	FILE *yy_input_file;$/;"	m	struct:yy_buffer_state	file:
+yy_is_interactive	snail-lex.c	/^	int yy_is_interactive;$/;"	m	struct:yy_buffer_state	file:
+yy_is_our_buffer	snail-lex.c	/^	int yy_is_our_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_last_accepting_cpos	snail-lex.c	/^static char *yy_last_accepting_cpos;$/;"	v	file:
+yy_last_accepting_state	snail-lex.c	/^static yy_state_type yy_last_accepting_state;$/;"	v	file:
+yy_load_buffer_state	snail-lex.c	/^static void yy_load_buffer_state  (void)$/;"	f	file:
+yy_meta	snail-lex.c	/^static yyconst flex_int32_t yy_meta[43] =$/;"	v	file:
+yy_n_chars	snail-lex.c	/^	yy_size_t yy_n_chars;$/;"	m	struct:yy_buffer_state	file:
+yy_n_chars	snail-lex.c	/^static yy_size_t yy_n_chars;		\/* number of characters read into yy_ch_buf *\/$/;"	v	file:
+yy_new_buffer	snail-lex.c	311;"	d	file:
+yy_nxt	snail-lex.c	/^	flex_int32_t yy_nxt;$/;"	m	struct:yy_trans_info	file:
+yy_nxt	snail-lex.c	/^static yyconst flex_int16_t yy_nxt[225] =$/;"	v	file:
+yy_scan_buffer	snail-lex.c	/^YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )$/;"	f
+yy_scan_bytes	snail-lex.c	/^YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )$/;"	f
+yy_scan_string	snail-lex.c	/^YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )$/;"	f
+yy_set_bol	snail-lex.c	323;"	d	file:
+yy_set_interactive	snail-lex.c	313;"	d	file:
+yy_size_t	snail-lex.c	/^typedef size_t yy_size_t;$/;"	t	file:
+yy_start	snail-lex.c	/^static int yy_start = 0;	\/* start state number *\/$/;"	v	file:
+yy_state_type	snail-lex.c	/^typedef int yy_state_type;$/;"	t	file:
+yy_switch_to_buffer	snail-lex.c	/^    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )$/;"	f
+yy_trans_info	snail-lex.c	/^struct yy_trans_info$/;"	s	file:
+yy_try_NUL_trans	snail-lex.c	/^    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )$/;"	f	file:
+yy_verify	snail-lex.c	/^	flex_int32_t yy_verify;$/;"	m	struct:yy_trans_info	file:
+yyalloc	snail-lex.c	/^void *yyalloc (yy_size_t  size )$/;"	f
+yyconst	snail-lex.c	107;"	d	file:
+yyconst	snail-lex.c	109;"	d	file:
+yyensure_buffer_stack	snail-lex.c	/^static void yyensure_buffer_stack (void)$/;"	f	file:
+yyfree	snail-lex.c	/^void yyfree (void * ptr )$/;"	f
+yyget_debug	snail-lex.c	/^int yyget_debug  (void)$/;"	f
+yyget_in	snail-lex.c	/^FILE *yyget_in  (void)$/;"	f
+yyget_leng	snail-lex.c	/^yy_size_t yyget_leng  (void)$/;"	f
+yyget_lineno	snail-lex.c	/^int yyget_lineno  (void)$/;"	f
+yyget_out	snail-lex.c	/^FILE *yyget_out  (void)$/;"	f
+yyget_text	snail-lex.c	/^char *yyget_text  (void)$/;"	f
+yyin	snail-lex.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yyinput	snail-lex.c	/^    static int yyinput (void)$/;"	f	file:
+yyleng	snail-lex.c	/^yy_size_t yyleng;$/;"	v
+yyless	snail-lex.c	174;"	d	file:
+yyless	snail-lex.c	2103;"	d	file:
+yyless	snail-lex.c	2104;"	d	file:
+yylex_destroy	snail-lex.c	/^int yylex_destroy  (void)$/;"	f
+yylineno	snail-lex.c	/^int yylineno = 1;$/;"	v
+yylval	snail-lex.c	562;"	d	file:
+yymore	snail-lex.c	542;"	d	file:
+yyout	snail-lex.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yypop_buffer_state	snail-lex.c	/^void yypop_buffer_state (void)$/;"	f
+yypush_buffer_state	snail-lex.c	/^void yypush_buffer_state (YY_BUFFER_STATE new_buffer )$/;"	f
+yyrealloc	snail-lex.c	/^void *yyrealloc  (void * ptr, yy_size_t  size )$/;"	f
+yyrestart	snail-lex.c	/^    void yyrestart  (FILE * input_file )$/;"	f
+yyset_debug	snail-lex.c	/^void yyset_debug (int  bdebug )$/;"	f
+yyset_in	snail-lex.c	/^void yyset_in (FILE *  in_str )$/;"	f
+yyset_lineno	snail-lex.c	/^void yyset_lineno (int  line_number )$/;"	f
+yyset_out	snail-lex.c	/^void yyset_out (FILE *  out_str )$/;"	f
+yyterminate	snail-lex.c	714;"	d	file:
+yytext	snail-lex.c	/^char *yytext;$/;"	v
+yytext_ptr	snail-lex.c	351;"	d	file:
+yyunput	snail-lex.c	/^    static void yyunput (int c, register char * yy_bp )$/;"	f	file:
+yywrap	snail-lex.c	337;"	d	file:

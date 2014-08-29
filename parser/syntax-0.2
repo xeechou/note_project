@@ -1,0 +1,62 @@
+topic 		::= 	topic ID { [feature;]* }	#list 
+
+feature 	::= 	KPT ID [AKA ID] [EXTERN ID]; 
+		|	KPT ID [AKA ID] [EXTERN ID] : concat_strings;
+		|	KPT ID [AKA ID] [EXTERN ID] : { basic_exprs };	#list
+		|	LIST { [navigation;]* };
+		|	PROC ID {proc};
+
+formal		::= 	ID@ID		#topic ID, kpt ID
+		|	ID		#local kpt
+		|	ID.attr 	#local kpt, attr
+		|	attr
+
+attr		::=	WHAT
+		|	WHEN
+		|	HOW
+		|	WHY
+		|	WHERE
+		|	WHO
+		|	string
+
+basic_exprs	::=	basic_expr ;
+		|	basic_exprs basic_expr ;
+
+#one form
+basic_expr	::=	attr			#attr_declare
+
+		|	attr : const		#attr_define
+		;
+#multiple forms
+navigation	:=	formal : assignment
+		
+		|	enum [formal : assignment ;]+ mune
+
+		|	let formal [, formal]* in assigment tel
+
+		|	case attr [OF ID : assignment ; ]+ esac
+		;
+
+assignment	::= 	const
+
+		|	block_const	#basic assginment
+
+		|	CONNECT WITH ID ABOUT ID : assignment
+		
+		|	CONNECT TO ID ABOUT ID : assignment
+
+
+block_const	::=	{ [const;]+ }
+
+const		::=	ID
+		|	proc()
+		|	string
+
+
+proc 		::=	BEGIN [proc_component;]* END
+
+proc_component	::=	string
+		|	IF string
+		|	IF NOT string
+		|	WHILE string THEN string
+		|	...

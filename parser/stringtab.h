@@ -36,5 +36,6 @@ struct Entry *add_string(struct str_table *table, char *string);
 /* Global variables */
 extern struct str_table *idtable;
 extern struct str_table *strtable;
+void strtable_init(void);
 
 #endif	/* STRINGTAB_H */

@@ -1,5 +1,6 @@
 #purpose
 >This project is about to design a new programming language for note taking,
+>Called SNAIL.
 >We programmers deserve better tools for taking note, I just finnished the
 >Compiler course on Coursera, so I am now be able to write a compiler myself :)
 

@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
-#include "snl.h"
-#include "stringtab.h"
+#include "snail.h"
+#include "snail_tab.h"
 extern int curr_lineno;
 static int nested_cmtl = 0;
 
@@ -10,6 +10,8 @@ char str_buf[MAX_STR_LEN];
 char *str_buf_ptr;
 int error_flag;
 extern FILE *fin;
+extern symbol_tab id_table;
+extern symbol_tab str_table;
 /* some assumptions */
 #define yylval snl_yylval
 /* define some error flag */
@@ -18,7 +20,6 @@ extern FILE *fin;
 #define EOF_IN_STR	-3
 %}
 
-%option noyywrap
 %x			comment
 %x			line_comment
 %x			str
@@ -156,7 +157,7 @@ RIGHT_BRA		")"
 
  /* Keywords ends */
 
-{OBJID_REG}		{	snl_yylval.symbol = add_string(idtable, yytext);
+{OBJID_REG}		{	snl_yylval.sym = st_add_string(&id_table, yytext);
 				return (OBJECTID);
 			}
 
@@ -182,8 +183,8 @@ constant too long";
 				}
 				else {
 					*str_buf_ptr = '\0';
-					snl_yylval.symbol = 
-					add_string(strtable, str_buf);
+					snl_yylval.sym = 
+					st_add_string(&str_table, str_buf);
 					return (STR_CONST);
 				}
 
@@ -205,14 +206,17 @@ constant too long";
 				curr_lineno++;
 				return (ERROR);
 			}
+
 <str>\\			{	BEGIN(str_bkslash);		}
-<str_bkslash>\"	{	*str_buf_ptr++ = '\"';		
+
+<str_bkslash>\"		{	*str_buf_ptr++ = '\"';		
 				BEGIN(str);
 			}
 
 <str_bkslash>\\		{	*str_buf_ptr++ = '\\';		
 				BEGIN(str);
 			}
+
 <str_bkslash>\n		{	*str_buf_ptr++ = '\n';
 				curr_lineno++;
 				BEGIN(str);
@@ -273,3 +277,4 @@ constant too long";
 			}
 %%
 
+int yywrap(void) { return 1;}

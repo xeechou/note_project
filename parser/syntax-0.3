@@ -1,0 +1,77 @@
+topic 		::= 	topic id { [feature;]* }	#list 
+
+id		::=	ID
+		|	id_str
+		;
+
+feature 	::= 	KPT  id [AKA ID] [EXTERN ID_expr ]; 
+		|	KPT  id [AKA ID] [EXTERN ID_expr ] := concat_strings;
+		|	KPT  id [AKA ID] [EXTERN ID_expr ] := { [attr;]* }
+
+		|	FUNC id ([id [, id]*]) { [stat;]* }
+		|	proc
+		;
+
+formal		::= 	id@id		#topic ID, kpt ID
+		|	id		#local kpt
+		|	id.attr 	#local kpt, attr
+		|	attr
+
+attr_name	::=	WHAT
+		|	WHEN
+		|	HOW
+		|	WHY
+		|	WHERE
+		|	WHO
+		;
+
+
+attr		::=	attr_name
+		|	attr_name := expr
+		|	attr_name += expr
+		|	basic_expr
+		;
+labeled_stat	::=	ID := expr
+		|	ID += expr
+
+stat		::=	labeled_stat
+
+		|	LET id [:= expr] [, id [:= expr]]* IN stat; TEL
+		|	LET id [:= expr] [, id [:= expr]]* IN { [stat;]* } TEL
+
+		|	CASE attr OF  [labeled_stat ;]+ ESAC
+		;
+
+
+expr		::= 	const
+
+		|	block_const
+
+		|	id([expr[, expr]*])
+
+		|	CONNECT WITH ID ABOUT ID := expr
+		
+		|	CONNECT TO ID ABOUT ID := expr
+
+		|	expr | expr
+		|	expr & expr
+		|	expr - expr
+		;
+
+
+block_const	::=	{ [const;]+ }
+
+const		::=	formal
+		#we identify id, proc and function by id
+		#|	PROC id
+		|	string
+
+
+proc		::=	PROC id ([id [, id]*]) { BEGIN [proc_component;]* END }
+
+proc_component	::=	string
+		|	IF [NOT] proc_component
+		|	WHILE proc_component THEN proc_component
+		|	SWITCH proc_component 
+				{ [CASE proc_component : proc_componet;]* }
+		;

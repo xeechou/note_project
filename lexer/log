@@ -1,0 +1,6 @@
+again: memory overlap
+str_table's memory seems overlap with YY_CURRENT_BUFFER,
+both of them use 0x608630,
+
+this is really weird, malloc should not behave like this.
+It is really unlikely that I used the memory that I should not use.

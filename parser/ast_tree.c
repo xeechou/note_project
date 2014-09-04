@@ -6,7 +6,13 @@
 int curr_lineno;
 int in_function = 0;
 
-
+/* TODO:
+ * -for now, every struct is alloced directly by malloc, use the smalloc or
+ *  slots struct to manage them, since we only alloc and free them altogether.
+ * 
+ * -use union to compute the biggest memory of all the struct, so we can use
+ *  slot to manage it, although this method will waste some memory.
+ */
 Program_ *program(node *topics)
 {
 	Program_ *p = malloc(sizeof(Program_));
@@ -16,8 +22,7 @@ Program_ *program(node *topics)
 node *topic_simple(symbol * name, node *features)
 {
 	Topic_ *t = malloc(sizeof(Topic_));
-	t->curr_lineno = curr_lineno;
-	t->dump = &dump_topic;
+	info_debug(&t->node, curr_lineno, dump_topic);
 
 	t->features = features;
 	t->name = name;
@@ -42,16 +47,15 @@ node *func_feature(Func_ *l)
 
 Kpt_ *kpt_simple(symbol *name, 
 		 symbol *aka_name,
-		 symbol *subset_name,
-		 node * attr_l)
+		 node *subsets)
 {
 	Kpt_ *k = malloc(sizeof(Kpt_));
-	k->curr_lineno = curr_lineno;
+	info_debug(&k->node, curr_lineno, dump_kpt);
+
 	k->name = name;
 	k->aka_name = aka_name;
-	k->subset_name = subset_name;
-	k->attr_l = attr_l;
-	k->dump = &(dump_kpt);//not implemented
+	k->subsets = subsets;
+	k->attr_l = NULL;
 	return k;
 }
 
@@ -64,8 +68,7 @@ Kpt_ *kpt_const(Kpt_ *k, struct List *s)
 Func_ * function(symbol *name, node *args, node *stat_l)
 {
 	Func_ * f = malloc(sizeof(Func_));
-	f->curr_lineno = curr_lineno;
-	f->dump = &dump_func;
+	info_debug(&f->node, curr_lineno, dump_func);
 
 	f->name = name;
 	f->stat_l = stat_l;
@@ -77,11 +80,10 @@ Func_ * function(symbol *name, node *args, node *stat_l)
 node *attr_stat(symbol * a, struct List *expr)
 {
 	Attr_Stat_ *be = malloc(sizeof(Attr_Stat_));
-	be->curr_lineno = curr_lineno;
-	be->attr_name = a;
+	info_debug(&be->node, curr_lineno, dump_attr);
 
+	be->attr_name = a;
 	be->expr = expr;
-	be->dump = &dump_attr;
 	return &(be->list);
 }
 
@@ -90,8 +92,7 @@ node *attr_stat(symbol * a, struct List *expr)
 node *label_stat(node* navig, node *n)
 {
 	Label_Stat_ *f = malloc(sizeof(Label_Stat_));
-	f->curr_lineno = curr_lineno;
-	f->dump = &dump_label_stat;
+	info_debug(&f->node, curr_lineno, dump_label_stat);
 
 	f->navig = navig;
 	f->expr = n;
@@ -102,8 +103,7 @@ node *label_stat(node* navig, node *n)
 node *let_stat(node *n, node *expr)
 {
 	Let_Stat_ *l = malloc(sizeof(Let_Stat_));
-	l->curr_lineno = curr_lineno;
-	l->dump = &dump_let_stat;
+	info_debug(&l->node, curr_lineno, dump_let_stat);
 
 	l->navig_list = n;
 	l->expr = expr;
@@ -113,8 +113,7 @@ node *let_stat(node *n, node *expr)
 node *case_stat(symbol *name, node *stat_l)
 {
 	Case_Stat_ *c = malloc(sizeof(Case_Stat_));
-	c->curr_lineno = curr_lineno;
-	c->dump = &dump_case_stat;
+	info_debug(&c->node, curr_lineno, dump_case_stat);
 
 	c->name = name;
 	c->stat_l = stat_l;
@@ -124,8 +123,8 @@ node *case_stat(symbol *name, node *stat_l)
 node *connection(node *navig, int type, node *expr)
 {
 	Conn_ *c = malloc(sizeof(struct Conn));
-	c->curr_lineno = curr_lineno;
-	c->dump = &(dump_conn);
+	info_debug(&c->node, curr_lineno, dump_conn);
+
 	c->navig = navig;
 	c->type = type; 
 	c->expr = expr;
@@ -135,8 +134,7 @@ node *connection(node *navig, int type, node *expr)
 node *dispatch(symbol *func_name, node *expr_l)
 {
 	Dispatch_ *d = malloc(sizeof(Dispatch_));
-	d->curr_lineno = curr_lineno;
-	d->dump = &dump_dispatch;
+	info_debug(&d->node, curr_lineno, dump_dispatch);
 
 	d->func_name = func_name;
 	d->expr_l = expr_l;
@@ -145,8 +143,8 @@ node *dispatch(symbol *func_name, node *expr_l)
 node *operation(node *a, node *b, int type)
 {
 	Operation_ *o = malloc(sizeof(Operation_));
-	o->curr_lineno = curr_lineno;
-	o->dump = &dump_operation;
+	info_debug(&o->node, curr_lineno, dump_operation);
+
 	o->type = type;
 	o->a = a;
 	o->b = b;
@@ -157,8 +155,7 @@ node *operation(node *a, node *b, int type)
 node *navig(symbol * topic, symbol * kpt, symbol * attr)
 {
 	Navig_ *f = malloc(sizeof(struct Navig));
-	f->curr_lineno = curr_lineno;
-	f->dump = &dump_navig;
+	info_debug(&f->node, curr_lineno, dump_navig);
 
 	f->in_function = in_function;
 	f->topic = topic;
@@ -171,8 +168,7 @@ node *navig(symbol * topic, symbol * kpt, symbol * attr)
 node *id_node(symbol * s)
 {
 	Const_ *cons = malloc(sizeof(Const_));
-	cons->curr_lineno = curr_lineno;
-	cons->dump = &dump_const;
+	info_debug(&cons->node, curr_lineno, dump_const);
 
 	cons->type = ID;
 	cons->con.id = s;
@@ -182,10 +178,30 @@ node *id_node(symbol * s)
 node *string_node(symbol * s)
 {
 	Const_ *cons = malloc(sizeof(Const_));
-	cons->curr_lineno = curr_lineno;
-	cons->dump = &dump_const;
+	info_debug(&cons->node, curr_lineno, dump_const);
 
 	cons->type = STRING;
 	cons->con.str = s;
 	return &(cons->list);
+}
+
+Proc_ *procedure(symbol *name, node *proc_l)
+{
+	Proc_ *p = malloc(sizeof(Proc_));
+	info_debug(&p->node, curr_lineno, dump_proc);
+
+	p->name = name;
+	p->proc_l = proc_l;
+	return p;
+}
+node *step(int type, node *c0, node *c1, node *c2)
+{
+	Proc_Component_ *pc = malloc(sizeof(Proc_Component_));
+	info_debug(&pc->node, curr_lineno, dump_step);
+
+	pc->type = type;/* string	IF 	IF_ELSE	WHILE  	*/
+	pc->c0 = c0;	/* string	pc	pc	pc	*/
+	pc->c1 = c1;	/* NULL		pc	pc	pc	*/
+	pc->c2 = c2;	/* NULL		NULL	pc	NULL	*/
+	return &pc->list;
 }

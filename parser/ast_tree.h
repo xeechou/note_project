@@ -10,11 +10,6 @@ extern symbol_tab id_table;
 extern symbol_tab str_table;
 extern symbol_tab str_psr_tab;
 
-/* for future optimization */
-struct debug_info {
-	int curr_lineno;
-};
-
 typedef struct List node; 
 
 typedef struct Program Program_; 
@@ -23,6 +18,7 @@ typedef struct Feature Feature_;
 typedef struct Kpt Kpt_;
 typedef struct Func Func_;
 typedef struct Proc Proc_;
+typedef struct Proc_Component Proc_Component_;
 typedef struct Attr_Stat Attr_Stat_;
 typedef struct Label_Stat Label_Stat_;
 typedef struct Let_Stat Let_Stat_;
@@ -34,21 +30,24 @@ typedef struct Operation Operation_;
 typedef struct Const Const_;
 typedef struct Navig Navig_;
 
-
 /* the struct is used to represent a subset of certern structs,
  * every struct is started with curr_lineno, list, (*dump)(int n),
  * (dump function points to the exact function that will display
  * information of expressions,
- * */
+ */
 
-/* TODO: use node_struct in this way :
+/* TODO: use debug_info in this way :
  * struct some_struct {
- * 	struct node_struct;
+ * 	struct debug_info;
  * 	type data;
  * 	...
  * };
  * This mechanism may increase the complexity of dump function */
-
+/* this is the key hack to replace in the parser struct */
+typedef struct {
+	int curr_lineno;
+	int (*dump) (int n, struct List *pos);
+} debug_info;
 
 struct Program {
 	int curr_lineno;
@@ -56,29 +55,27 @@ struct Program {
 };
 
 struct Topic {
-	int curr_lineno;
 	struct List list;
-	int (*dump) (int n, struct List *pos);
+	debug_info node;
 
 	symbol * name;
 	struct List *features;
-} ;
+};
 
 struct Kpt {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	struct List *attr_l;
 	symbol * name;
 	symbol * aka_name;
-	symbol * subset_name;
+	struct List *subsets;
 };
 
 struct Func {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
+
 	//function is sequences of statements
 	symbol *name;
 	struct List *args;
@@ -86,17 +83,27 @@ struct Func {
 };
 
 struct Proc {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
+	
+	symbol *name;
+	struct List *proc_l;
 };
-/* not a completed struct */
+
+struct Proc_Component {
+	struct List list;
+	debug_info node;
+
+	int type;	
+	struct List *c0;
+	struct List *c1;
+	struct List *c2;
+};
 
 
 struct Attr_Stat {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	symbol * attr_name;
 	struct List *expr;
@@ -105,27 +112,24 @@ struct Attr_Stat {
 /****** Statation options ******/
 
 struct Label_Stat {
-	int curr_lineno;
-	struct List list;	/* as a node of Statation list */
-	int (*dump) (int n, struct List *pos);
+	struct List list;
+	debug_info node;
 
 	node *navig;
 	struct List *expr;
 };
 
 struct Let_Stat {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	struct List *navig_list;
 	struct List *expr;
 };
 
 struct Case_Stat {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	symbol *name;
 	struct List *stat_l;
@@ -139,18 +143,10 @@ struct Case_Stat {
 
 
 
-
-
 /******* expressions ****/
-struct Expr {
-	int curr_lineno;
-	struct List list;	/* as a node of assignment */
-};
-
 struct Const {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	int type;
 	union {
@@ -161,9 +157,8 @@ struct Const {
 };
 
 struct Navig {
-	int curr_lineno;
 	struct List list;
-	int (*dump)(int n, struct List *pos);
+	debug_info node;
 
 	int in_function;
 	symbol * topic;
@@ -172,31 +167,34 @@ struct Navig {
 };
 /*checked */
 struct Conn {
-	int curr_lineno;
 	struct List list;
-	int (*dump) (int n, struct List *pos);
+	debug_info node;
+
 	int type;
 	node* navig;
 
 	struct List *expr;
 };
 struct Dispatch {
-	int curr_lineno;
 	struct List list;
-	int (*dump) (int n, struct List *pos);
+	debug_info node;
 
 	symbol *func_name;
 	struct List *expr_l;
 };
 struct Operation {
-	int curr_lineno;
 	struct List list;
-	int (*dump) (int n, struct List *pos);
+	debug_info node;
+
 	int type;
 	node *a;
 	node *b;
 };
 /* the widely used function... */
+static inline node *nil_node(void)
+{
+	return NULL;
+}
 static inline node *single_node(node *n)
 {
 	init_list(n);
@@ -209,16 +207,42 @@ static inline node *append_node(node *a, node *b)
 	return a;
 }
 
+static inline void info_debug(debug_info *node, 
+			     int lineno, 
+			     int (*dump) (int n, struct List *pos))
+{
+	node->curr_lineno = lineno;
+	node->dump = dump;
+}
+/* this struct is used for uniform alloc */
+typedef union {
+	Program_ program;
+	Topic_ topic;
+	Kpt_ kpt;
+	Func_ func;
+	Proc_ proc;
+	Attr_Stat_ attr;
+	Label_Stat_ label;
+	Let_Stat_ let;
+	Conn_ conn;
+	Dispatch_ dispatch;
+	Operation_ oper;
+	Const_ con;
+	Navig_ navig;
+} node_union;
+
 /*functions */
 Program_ *program(node *topics);
 node *topic_simple(symbol * name, node *features);
 node *kpt_feature(Kpt_* k);
 node *proc_feature(Proc_ *p);
 node *func_feature(Func_ *l);
-Kpt_ *kpt_simple(symbol *, symbol *, symbol *, node *); 
+Kpt_ *kpt_simple(symbol *, symbol *, node *); 
 Kpt_ *kpt_const(Kpt_ *k, struct List *s);
 
 Func_ * function(symbol *name, node *args, node *stat_l);
+Proc_ *procedure(symbol *name, node *proc_l);
+node *step(int type, node *c0, node *c1, node *c2);
 
 node *attr_stat(symbol * a, struct List *con);
 

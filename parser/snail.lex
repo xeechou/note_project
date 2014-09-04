@@ -68,6 +68,11 @@ MUNE_REG		mune
 LET_REG			let
 IN_REG			in
 TEL_REG			tel
+IF_REG			if
+FI_REG			fi
+THEN_REG		then
+ELSE_REG		else
+WHILE_REG		while
 
 CONNECT_REG		connect
 WITH_REG		with
@@ -174,6 +179,11 @@ RIGHT_BRA		")"
 {LET_REG}		{	return (LET);		}
 {IN_REG}		{	return (IN);		}
 {TEL_REG}		{	return (TEL);		}
+{IF_REG}		{	return (IF);   		}
+{FI_REG}		{	return (FI);		}
+{THEN_REG}		{	return (THEN);		}
+{ELSE_REG}		{	return (ELSE);		}
+{WHILE_REG}		{	return (WHILE);		}
 
 {CONNECT_REG}		{	return (CONNECT);	}
 {WITH_REG}		{	return (WITH);		}
@@ -222,7 +232,7 @@ RIGHT_BRA		")"
 				curr_lineno++;
 				return (ERROR);
 			}
-<obj_str>[a-zA-Z0-9\ ]	{
+<obj_str>[a-zA-Z0-9\ \-\!\#\^]	{
 				*str_buf_ptr++ = *yytext;
 			}
  /* all the other charactors is invalid */

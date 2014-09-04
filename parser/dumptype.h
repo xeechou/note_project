@@ -4,7 +4,7 @@
 //incomplete struct
 typedef struct List node;
 typedef struct Program Program_;
-static int (*dump_type) (int n, node *pos) = (void *)0;
+//static int (*dump_type) (int n, node *pos) = (void *)0;
 
 int dump_program(Program_ *p);
 int dump_topic(int n, node *pos);
@@ -21,4 +21,6 @@ int dump_case_stat(int n, node *pos);
 int dump_conn(int n, node *pos);
 int dump_dispatch(int n, node *pos);
 int dump_operation(int n, node *pos);
+int dump_step(int n, node *pos);
+int dump_proc(int n, node *pos);
 #endif /* dumptype.h */

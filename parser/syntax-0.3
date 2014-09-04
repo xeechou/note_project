@@ -69,9 +69,9 @@ const		::=	formal
 
 proc		::=	PROC id ([id [, id]*]) { BEGIN [proc_component;]* END }
 
+# now the proc cannot interact with another proc, the future version may have
+# it
 proc_component	::=	string
 		|	IF [NOT] proc_component
 		|	WHILE proc_component THEN proc_component
-		|	SWITCH proc_component 
-				{ [CASE proc_component : proc_componet;]* }
 		;

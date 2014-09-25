@@ -28,10 +28,15 @@ symbol *st_add_string(symbol_tab *st, char *str)
 {
 	symbol e;
 	e.len = strlen(str);
+	e.base = NULL;
 	e.str = str;
+	smmblk *smm = &st->arr;
+
 	symbol *test = oht_lookup(&st->table, &e, NOC);
 	if (!test) {
-		smm_append(&st->arr, str, (void **)&(e.str), e.len + 1);
+		smm_append(smm, str, (void **)&(e.str), e.len + 1);
+		e.base = &st->arr;
+		e.index = smm_getpos(smm, (e.str));
 		test = oht_lookup(&st->table, &e, CRE);
 	}
 	return test;
@@ -39,37 +44,46 @@ symbol *st_add_string(symbol_tab *st, char *str)
 /* concat_string tries to append string later after formal,
  * remember formal is in parser table, later is in lexer table.
  */
-
-static int islast(smmblk *s, char *str, int len)
+static inline char *sym_gstr(symbol *s)
 {
-	return (str + len ==
-			(char *)s->elems + s->esize *s->log_len);
+	if (s->base == NULL)
+		return  s->str;
+	else
+		return (char *)(((symbol *)s)->base->elems) + 
+			((symbol *)s)->index;
 }
+static int islast(smmblk *s, smm_t pos, int len)
+{
+	return (pos + len == s->log_len);
+}
+/* they are both in the table, so use sym_gstr */
 symbol *st_concat_string(symbol_tab *st, symbol *formal, symbol *later)
 {
+	smmblk *smm = formal->base;
 	char *sym, *trash;
 	//in most case, formal will be the last string in array, we just
 	//append later in and we are done
-	if (islast(&st->arr, formal->str, formal->len + 1)) {
+	if (islast(&st->arr, formal->index, formal->len + 1)) {
 		smm_delete(&st->arr,(void *) &sym, 1);
-		smm_append(&st->arr, later->str, (void *)&sym, later->len + 1);
-		sym = formal->str;	//we just need the first string addr
+		smm_append(&st->arr, sym_gstr(later), (void *)&sym, later->len + 1);
+		sym = sym_gstr(formal);	//we just need the first string addr
 	} // otherwise, we have to re-install formal string again :(
 	else {
-		smm_append(&st->arr, formal->str, (void *)&sym, formal->len);
+		smm_append(&st->arr, sym_gstr(formal), (void *)&sym, formal->len);
 
-		smm_append(&st->arr, later->str, (void *)&trash, later->len+1);
+		smm_append(&st->arr, sym_gstr(later), (void *)&trash, later->len+1);
 	}
 	//now we have to update formal's hash value
 	oht_delete(&st->table, formal);
-	formal->str = sym;
+	formal->base = &st->arr;
+	formal->index = smm_getpos(smm, sym);
 	formal->len = formal->len + later->len + 1;
 	return oht_lookup(&st->table, formal, CRE);
 	//actually, return value should be formal again.
 }
 symbol *single_string(symbol_tab *st, symbol *s)
 {
-	return st_add_string(st, s->str);
+	return st_add_string(st, sym_gstr(s));
 }
 /* djb2 is a good hash function for string, it's fast and little collision.
  * The original reference: http://www.cse.yorku.ca/~oz/hash.html   
@@ -91,7 +105,8 @@ djb2 (unsigned char *str)
 unsigned long 
 string_hash(void *sym, size_t hashsize)
 {
-	unsigned char *c = (unsigned char *)((symbol *)sym)->str;
+	unsigned char *c = (unsigned char *)sym_gstr((symbol *)sym);
+			
 	unsigned long hashval = djb2(c);
 	return hashval % hashsize;
 }
@@ -99,24 +114,27 @@ string_hash(void *sym, size_t hashsize)
 unsigned long 
 symbol_hash(void *sym, size_t hashsize)
 {
-	char *str = ((symbol *)sym)->str;
+	unsigned char *c = (unsigned char *)sym_gstr((symbol *)sym);
+		    
 	unsigned long hashval = 0;
 
-	for (hashval = 0; *str != '\0'; str++) {
-		hashval = *str + 31 * hashval;
+	for (hashval = 0; *c != '\0'; c++) {
+		hashval = *c + 31 * hashval;
 	}
 	return hashval % hashsize;
 }
 static int str_cmp(const void *a, const void *b)
 {
-	/* actually, it compares symbol */
-	return (strcmp(((symbol *)a)->str, ((symbol *)b)->str));
+	char *s1 = sym_gstr((symbol *)a);
+	char *s2 = sym_gstr((symbol *)b);
+	return strcmp(s1, s2);
 }
+/* don't know what this function used for anymore */
 static int str_chk(void *item, int chk_val, size_t how_many)
 {
 	size_t i;
 	int   chk_rel = OHT_OHTER;
-	char *elem = ((symbol *)item)->str;
+	char *elem = sym_gstr((symbol *)item);
 	for (i = 0; i < how_many; i++) {
 		// the job here is either check the item value or
 		// set some value for later checking
@@ -145,19 +163,19 @@ int main()
 {
 	char *s = "This is a test.";
 	char *t = "This is still a test.";
-	FILE *f = fopen("smalloc.c", "r");
+	FILE *f = fopen("snail_tab.c", "r");
 	assert(f != NULL);
 	fseek(f, 0, SEEK_END);
 	size_t len = ftell(f);
 	fseek(f, 0, SEEK_SET);
 	symbol_tab str_table;
 	st_init(&str_table, len, &string_hash);
-	int i;
 	symbol *sym1, *sym2;
 		sym1 = st_add_string(&str_table, s);
 		sym2 = st_add_string(&str_table, t);
 		sym1 = st_concat_string(&str_table, sym1, sym2);
 		printf("%s", sym1->str);
 	putchar('\n');
+	return 0;
 }
 */

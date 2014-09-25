@@ -20,6 +20,11 @@
 
 #define ID		1
 #define STRING		2
+/*pc_type */
+#define PC_STR		1
+#define PC_IF		2
+#define PC_IF_ELSE	3
+#define PC_LOOP		4
 
 /* connection */
 #define TO_CONN		1

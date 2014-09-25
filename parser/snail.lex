@@ -1,22 +1,23 @@
 %{
 #include <stdio.h>
-#include "ast_tree.h"
+#include "snail.h"
 #include "snail_parser.h"
 YYSTYPE snail_yylval;
 #define yylex snail_yylex
-#include "snail_tab.h"
+extern FILE *fin;
 extern int curr_lineno;
-static int nested_cmtl = 0;
+
 
 #define MAX_STR_LEN 1025
-/* we alloc enough memory then 
- * we don't need to check buffer overflow */
-extern char *str_buf;
-char *str_buf_ptr;
-int error_flag;
-extern FILE *fin;
-extern symbol_tab id_table;
-extern symbol_tab str_table;
+
+static int nested_cmtl = 0;
+static char *str_buf;
+static char *str_buf_ptr;
+static int error_flag;
+static symbol_tab *id_table;
+static symbol_tab *str_table;
+
+
 /* some assumptions */
 /* define some error flag */
 
@@ -30,7 +31,8 @@ extern symbol_tab str_table;
  *  need to worry about memory overflow. 
  */
 %}
-
+%option nounput
+%option noinput
 %x			comment
 %x			line_comment
 %x			str
@@ -193,7 +195,7 @@ RIGHT_BRA		")"
 
  /* Keywords ends */
 
-{OBJID_REG}		{	snail_yylval.sym = st_add_string(&id_table, yytext);
+{OBJID_REG}		{	snail_yylval.sym = st_add_string(id_table, yytext);
 				//snail_yylval.sym = st_add_string(&id_table, yytext,
 				//					strlen(yytext));
 				return (OBJECTID);
@@ -211,7 +213,7 @@ RIGHT_BRA		")"
 				else
 					str_buf_ptr = '\0';
 					snail_yylval.sym = 
-					st_add_string(&id_table, str_buf);
+					st_add_string(id_table, str_buf);
 					//str_add_string(&id_table, str_buf,
 					//		str_buf_ptr - str_buf);
 					return (OBJECTID);
@@ -253,7 +255,7 @@ RIGHT_BRA		")"
 				else {
 					*str_buf_ptr = '\0';
 					snail_yylval.sym = 
-					st_add_string(&str_table, str_buf);
+					st_add_string(str_table, str_buf);
 					//str_add_string(&str_table, str_buf,
 					//		str_buf_ptr - str_buf);
 					return (STR_CONST);
@@ -345,5 +347,14 @@ RIGHT_BRA		")"
 				return (ERROR);
 			}
 %%
+
+
+void prepare_lexer(SNAILState *s)
+{
+	
+	id_table = &s->id_table;
+	str_table = &s->str_table;
+	str_buf = s->str_buf;
+}
 
 int yywrap(void) { return 1;}

@@ -1,207 +1,195 @@
 #include "ast_tree.h"
-#include "snl_const.h"
-#include "dumptype.h"
-#include <stdlib.h>
-/* global constant */
+//#include <stdarg.h> since function is defined in header files, the head file
+//must include <stdarg.h>
+#include "misc/misc_types.h"
+
+static void del_node_data(node_data *to_del, page_strt *p);
+extern int curr_lineno;			// a notorious global we have :p
+static inline void info_debug(debug_info *info, int type, int (*func)(int, ast_node *))
+{
+	info->curr_lineno = curr_lineno;
+	info->type = type;
+	info->dump = func;
+}
+/* generate one line in syntax tree */
+ast_node *syntax_line(char *start, char *end, 
+		      	int type, node_data *items,
+			unsigned int n_nodes, page_strt *p)
+{
+	ast_node n, *ret;
+	info_debug(&n.info, type, dump_type); //the first function we added in will add all the
+					 //other related functions in
+					 //debug_info
+	n.start.name = start;
+	n.end.name = end;
+	n.items = items;
+	n.n_nodes = n_nodes;
+
+	pstrt_insert(p, &n, (void **)&ret);
+	return ret;
+}
+
+/* we tries to delete a node_data n from a ast_node, check if n is the first
+ * node of ast_node */
+void syntax_line_del(node_data *n, node_data **pos, page_strt *p)
+/* this funtion assumes that only restraint now is head problem */
+{
+	node_data *d = *pos;
+	if (n->next == n)  		//the only node...
+		*pos == NULL;
+	else if (n == d)  		//Oops, first node
+		*pos = n->next; 
+	del_node_data(n, p);		//delete it anyway
+	return;
+}
+
+void clear_node_data(ast_node *n, page_strt *p)
+{
+	node_data *to_del = n->items;
+	
+	while (to_del->next != n->items) {
+		node_data *entry = to_del;
+		to_del->next = to_del->next->next;
+		del_node_data(entry, p);
+	}
+	del_node_data(to_del, p);
+	n->items = NULL;
+}
+
+node_data *compose_node_data(int num, node_data *first, ...)
+{
+	if (first == NULL)
+		return NULL;
+	first->prev = first->next = first;	//initialize
+	va_list ap;
+
+	node_data *i, *prev;
+	va_start(ap, first);
+	int count = 0;
+	for (prev = i = first; count < num; i = va_arg(ap, node_data *)) {
+		i->prev = prev;		//first iteration is trival
+		i->next = first;	//first iteration is trival
+		prev->next = i;
+		first->prev = i;
+
+		prev = first->prev;	//100% correctness
+		count++;
+	}
+	va_end(ap);
+	return first;
+}
+
+
+node_data *append_node_data(int num, node_data *first, ...)
+{
+	if (first == NULL)
+		return NULL;
+	va_list ap;
+
+	node_data *i, *prev, *next;
+	prev = first->prev;
+	next = first->next;
+	va_start(ap, first);
+
+	// the first iteration is little tricky, coz you want to add head to
+	// where head belong. so the inital env has to be right:
+	// prev = first->prev;
+	// next = first->next;
+	//
+	// after that, prev is always first->prev, and next is always
+	// first
+	int count = 0;
+	for (i = first; count <= num; i = va_arg(ap, node_data *)) {
+		i->prev = prev;		//first iteration is trival
+		i->next = next;		//first iteration is trival
+		prev->next = i;
+		next->prev = i;
+		next = first;
+		prev = first->prev;	//100% correctness
+		count++;
+	}
+	va_end(ap);
+	return first;
+}
+
+static void del_node_data(node_data *to_del, page_strt *p)
+{
+	node_data *prev = to_del->prev;
+	node_data *next = to_del->next;
+	prev->next = next;
+	next->prev = prev;
+	pstrt_delete(p, to_del);
+}
+/* To ensure n is not to large, 
+ * this function has to be invoked by ast_node related function */
+/* start from 0 */
+node_data *n_node_data(ast_node *a, unsigned int n)
+{
+	if (n >= a->n_nodes)
+		return NULL;
+	int i = 0;
+	node_data *pos = a->items; // at least excute once
+	while (i < n) {
+		pos = pos->next;
+		i++;
+	}
+	return pos;
+}
+
+/****************** primitive type specific function ******************/
+node_data *data_sym(symbol *sym, page_strt *p)
+{
+	node_data d, *ret;
+	d.sym = sym;
+	d.type = NT_SYM;
+	pstrt_insert(p, &d, (void **)&ret);
+	return ret;
+}
+
+node_data *data_int(int i, page_strt *p)
+{
+	node_data d, *ret;
+	d.i = i;
+	d.type = NT_INT;
+	pstrt_insert(p, &d, (void **)&ret);
+	return ret;
+}
+
+node_data *data_node(ast_node *n, page_strt *p)
+{
+	node_data d, *ret;
+	d.n = n;
+	d.type = NT_NODE;
+	pstrt_insert(p, &d, (void **)&ret);
+	return ret;
+}
+/* test region */
+/*
+static page_strt nodes_data;
+static page_strt ast_nodes;
+static char *start = NULL;
+static char *end = NULL;
+#include <stdio.h>
 int curr_lineno;
-int in_function = 0;
+FILE *stream;
+int main(void) {
+	stream = stdin;
+	err_pstrt_init(&nodes_data, sizeof(node_data), 4096, NULL);
+	err_pstrt_init(&ast_nodes, sizeof(ast_node), 4096, NULL);
+	ast_node *b = syntax_line(start, end, 1, NULL, 0, &ast_nodes);
 
-/* TODO:
- * -for now, every struct is alloced directly by malloc, use the smalloc or
- *  slots struct to manage them, since we only alloc and free them altogether.
- * 
- * -use union to compute the biggest memory of all the struct, so we can use
- *  slot to manage it, although this method will waste some memory.
- */
-Program_ *program(node *topics)
-{
-	Program_ *p = malloc(sizeof(Program_));
-	p->topic_list = topics;
-	return p;
+	node_data *nd = compose_node_data(4, 
+					  data_int (1, &nodes_data),
+					  data_int (2, &nodes_data),
+					  data_int (3, &nodes_data), 
+					  data_node(b, &nodes_data));
+	ast_node *a = syntax_line(start, end, 1, nd, 4, &ast_nodes);
+	unsigned int i;
+
+	for (i = 0; i < 3; i++) {
+		int c = n_node_data(a, i)->i;
+		printf("%d\n", c);
+	}
+	return 0;
 }
-node *topic_simple(symbol * name, node *features)
-{
-	Topic_ *t = malloc(sizeof(Topic_));
-	info_debug(&t->node, curr_lineno, dump_topic);
-
-	t->features = features;
-	t->name = name;
-	return &(t->list);
-}
-
-
-node *kpt_feature(Kpt_* k)
-{
-	return &(k->list);
-}
-
-node *proc_feature(Proc_ *p)
-{
-	return &(p->list);
-}
-
-node *func_feature(Func_ *l)
-{
-	return &(l->list);
-}
-
-Kpt_ *kpt_simple(symbol *name, 
-		 symbol *aka_name,
-		 node *subsets)
-{
-	Kpt_ *k = malloc(sizeof(Kpt_));
-	info_debug(&k->node, curr_lineno, dump_kpt);
-
-	k->name = name;
-	k->aka_name = aka_name;
-	k->subsets = subsets;
-	k->attr_l = NULL;
-	return k;
-}
-
-Kpt_ *kpt_const(Kpt_ *k, struct List *s)
-{
-	k->attr_l = s;
-	return k;
-}
-
-Func_ * function(symbol *name, node *args, node *stat_l)
-{
-	Func_ * f = malloc(sizeof(Func_));
-	info_debug(&f->node, curr_lineno, dump_func);
-
-	f->name = name;
-	f->stat_l = stat_l;
-
-	f->args = args;
-	return f;
-}
-/*leaf*/
-node *attr_stat(symbol * a, struct List *expr)
-{
-	Attr_Stat_ *be = malloc(sizeof(Attr_Stat_));
-	info_debug(&be->node, curr_lineno, dump_attr);
-
-	be->attr_name = a;
-	be->expr = expr;
-	return &(be->list);
-}
-
-
-
-node *label_stat(node* navig, node *n)
-{
-	Label_Stat_ *f = malloc(sizeof(Label_Stat_));
-	info_debug(&f->node, curr_lineno, dump_label_stat);
-
-	f->navig = navig;
-	f->expr = n;
-	return &(f->list);
-}
-
-
-node *let_stat(node *n, node *expr)
-{
-	Let_Stat_ *l = malloc(sizeof(Let_Stat_));
-	info_debug(&l->node, curr_lineno, dump_let_stat);
-
-	l->navig_list = n;
-	l->expr = expr;
-	return &(l->list);
-}
-
-node *case_stat(symbol *name, node *stat_l)
-{
-	Case_Stat_ *c = malloc(sizeof(Case_Stat_));
-	info_debug(&c->node, curr_lineno, dump_case_stat);
-
-	c->name = name;
-	c->stat_l = stat_l;
-	return &(c->list);
-}
-/* checked */
-node *connection(node *navig, int type, node *expr)
-{
-	Conn_ *c = malloc(sizeof(struct Conn));
-	info_debug(&c->node, curr_lineno, dump_conn);
-
-	c->navig = navig;
-	c->type = type; 
-	c->expr = expr;
-	return &(c->list);
-}
-
-node *dispatch(symbol *func_name, node *expr_l)
-{
-	Dispatch_ *d = malloc(sizeof(Dispatch_));
-	info_debug(&d->node, curr_lineno, dump_dispatch);
-
-	d->func_name = func_name;
-	d->expr_l = expr_l;
-	return &(d->list);
-}
-node *operation(node *a, node *b, int type)
-{
-	Operation_ *o = malloc(sizeof(Operation_));
-	info_debug(&o->node, curr_lineno, dump_operation);
-
-	o->type = type;
-	o->a = a;
-	o->b = b;
-	return &(o->list);
-}
-
-/*checked */
-node *navig(symbol * topic, symbol * kpt, symbol * attr)
-{
-	Navig_ *f = malloc(sizeof(struct Navig));
-	info_debug(&f->node, curr_lineno, dump_navig);
-
-	f->in_function = in_function;
-	f->topic = topic;
-	f->kpt = kpt;
-	f->attr = attr;
-
-	return &(f->list);
-}
-
-node *id_node(symbol * s)
-{
-	Const_ *cons = malloc(sizeof(Const_));
-	info_debug(&cons->node, curr_lineno, dump_const);
-
-	cons->type = ID;
-	cons->con.id = s;
-	return &(cons->list);
-}
-
-node *string_node(symbol * s)
-{
-	Const_ *cons = malloc(sizeof(Const_));
-	info_debug(&cons->node, curr_lineno, dump_const);
-
-	cons->type = STRING;
-	cons->con.str = s;
-	return &(cons->list);
-}
-
-Proc_ *procedure(symbol *name, node *proc_l)
-{
-	Proc_ *p = malloc(sizeof(Proc_));
-	info_debug(&p->node, curr_lineno, dump_proc);
-
-	p->name = name;
-	p->proc_l = proc_l;
-	return p;
-}
-node *step(int type, node *c0, node *c1, node *c2)
-{
-	Proc_Component_ *pc = malloc(sizeof(Proc_Component_));
-	info_debug(&pc->node, curr_lineno, dump_step);
-
-	pc->type = type;/* string	IF 	IF_ELSE	WHILE  	*/
-	pc->c0 = c0;	/* string	pc	pc	pc	*/
-	pc->c1 = c1;	/* NULL		pc	pc	pc	*/
-	pc->c2 = c2;	/* NULL		NULL	pc	NULL	*/
-	return &pc->list;
-}
+*/

@@ -5,9 +5,10 @@
 #include "misc/misc_types.h"
 #define CRE 	1
 #define NOC	0
-
 typedef struct {
 	int len;
+	smmblk *base;
+	smm_t index;
 	char *str;
 } symbol;
 

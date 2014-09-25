@@ -66,7 +66,7 @@ void stack_pop(stack *s, void *ret_addr)
 			 s->esize);
 }
 
-void stack_push(stack *s, void *elem_addr)
+void stack_push(stack *s, const void *elem_addr)
 {
 	if (s->log_len == s->alloc_len)
 		stack_grow(s);

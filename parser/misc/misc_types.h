@@ -1,5 +1,6 @@
 #ifndef MISC_TYPES_H
 #define MISC_TYPES_H
+#include <stddef.h>
 /*TODO: add a copy function, memcpy is not efficient enough */
 
 /***************************** stack begin ***********************************/
@@ -24,7 +25,7 @@ int stack_isempty(stack *s);
 
 void stack_pop(stack *s, void *ret_addr);
 
-void stack_push(stack *s, void *elem_addr);
+void stack_push(stack *s, const void *elem_addr);
 /****************************** stack end *************************************/
 
 /***************************** slots begin ************************************/
@@ -32,6 +33,8 @@ typedef int (*slots_com_f) (const void *elemAddr1,
 			const void *elemAddr2);
 typedef void (*slots_free_f) (void *elemAddr);
 typedef void (*slots_map_f) (void *elemAddr, void *auxData);
+/* export outside, this represent how long the index can be */
+typedef size_t slot_ind_t;
 
 typedef struct {
 	void *elems;
@@ -54,6 +57,7 @@ void   *slots_insert(slots *s, const void *elemAddr);
 void    slots_replace(slots *s, const void *elemAddr, size_t pos);
 void    slots_delete(slots *s, size_t pos, void **ret_addr);
 void    slots_pop(slots *s, void *ret_addr);
+size_t  slots_getpos(slots *s, void *pos);
 
 void  slotsSearch(const slots *s, const void *key,
 		   slots_com_f searchfn, size_t start_index,
@@ -76,10 +80,13 @@ typedef struct {
 	size_t sec_size;		//secured size
 	void (*func) (void *);
 } smmblk;
-
+typedef size_t smm_t;
 void smm_init(smmblk *s, size_t esize, size_t init_alloc, size_t sec_size,
 		void (*func) (void *));
-
+#define smm_nth(s, index) \
+	(void *)((char *)(s->elems) + s->esize * index)
+#define smm_getpos(s, addr) \
+	(size_t)( ((char *)addr - (char *)(s->elems))  / s->esize)
 void smm_dispose(smmblk *s);
 void smm_append(smmblk *s, void *elem_addr, void **ret_addr, size_t num);
 void smm_delete(smmblk *s, void **ret_addr, size_t num);
@@ -150,5 +157,37 @@ void oht_delete(ohash_tab *oht, void *elem_addr);
 
 /****************************** hash end **************************************/
 
+/****************************** page start **************************************/
+/* this struct provides:
+ * a) page sized storage, which means I can use address in "user space",
+ * forget about that slot design 
+ *
+ * b) slots struct ability to record free slots;
+ */
 
+#define ERR_ALLOC	-1
+#define ERR_ARG		-2
+typedef struct {
+	size_t log_len;
+
+	unsigned long elems_per_page;
+	size_t esize;
+
+	size_t page_size;
+	size_t n_pages;
+	void *curr_page;
+
+	stack pages;	//array that for store page addresses;
+	stack frags;
+	void (* cp)(void *, const void *);
+} page_strt;
+
+int err_pstrt_init(page_strt *p, size_t esize, size_t page_size,
+		void (* cp) (void *, const void *));
+
+
+void pstrt_dispose(page_strt *p);
+int pstrt_insert(page_strt *p,  const void *elemAddr, void **ret_addr);
+void pstrt_delete(page_strt *p, void *ret_addr);
+/******************************* page end **************************************/
 #endif /*misc_types.h*/

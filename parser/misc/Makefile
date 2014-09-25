@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -g
 AR  = ar
 
-CSRC = stack.c slots.c smalloc.c hash_array.c hash_array1.c
+CSRC = stack.c slots.c page.c smalloc.c hash_array.c hash_array1.c
 OBJS = ${CSRC:.c=.o}
 
 DEPEND = ${CC} -MM
@@ -19,4 +19,4 @@ ${LIBMISC} : ${OBJS}
 
 .PHONY: clean
 clean :
-	-rm -f *.o *~ ${LIBMISC}
+	-rm -f *.o *.d *~ ${LIBMISC}

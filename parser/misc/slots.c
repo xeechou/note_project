@@ -35,7 +35,7 @@ void  slots_dispose(slots *s)
 }
 size_t   slots_length(const slots *s) {return s->log_len;}
 
-void *slots_nth(slots *s, size_t pos) 
+inline void *slots_nth(slots *s, size_t pos) 
 {
 	return (stack_find(&s->frags, &pos)) ?
 		NULL :
@@ -90,17 +90,19 @@ size_t slots_getpos(slots *s, void *addr)
 	assert(addr >= s->elems);
 	return ( (char *)addr - (char *)s->elems) / s->esize;
 }
-void  slots_delete(slots *s, size_t pos, void **ret_addr)
+void  slots_delete(slots *s, const size_t pos, void **ret_addr)
 {
-	void *addr = &pos;
+	void *addr;// = &pos;
 	assert(s->log_len > 0 && pos < s->log_len);
 
 	if (stack_find(&s->frags, &pos))
 		addr = NULL;
 	else if (pos == s->log_len -1)
 		addr = (char *)s->elems + --(s->log_len) * s->esize;
-	else
-		stack_push(&s->frags, &pos);
+	else {
+		addr = (void *)&pos;
+		stack_push(&s->frags, (const void *)addr);
+	}
 	*ret_addr = addr;
 }
 void slots_pop(slots *s, void *ret_addr)

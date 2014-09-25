@@ -83,7 +83,7 @@ static void oht_grow(ohash_tab *oht)
 
 	newht.table = new_tab;
 	
-	size_t h, i;
+	size_t i;
 	void *symbol;
 	int chk;
 	//remap

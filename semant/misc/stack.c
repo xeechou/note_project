@@ -4,7 +4,7 @@
 
 #include "misc_types.h"
 #include "utils.h"
-void stack_init(stack *s, size_t esize,  size_t init_alloc, 
+void stack_init(stack *s, ind_t esize,  ind_t init_alloc, 
 		int (*cmp) (const void *, const void *),
 		void (*func)(void *))
 {
@@ -31,7 +31,7 @@ int stack_find(stack *s, const void *elemaddr)
 {
 	int cmp_val;
 	
-	size_t len = s->log_len;
+	ind_t len = s->log_len;
 	char *addr;
 	while (len > 0) {
 		len--;
@@ -72,7 +72,7 @@ void stack_pop(stack *s, void *ret_addr)
 			 s->esize);
 }
 /* return 0 ~ n-1 elems in the stack */
-void *stack_nth(stack *s, size_t i)
+void *stack_nth(stack *s, ind_t i)
 {
 	if (i >= s->log_len)
 		return NULL;
@@ -92,14 +92,14 @@ void stack_push(stack *s, const void *elem_addr)
 }
 /*
 #include <stdio.h>
-size_t main()
+ind_t main()
 {
 	stack s;
-	stack_init(&s, sizeof(size_t), 4, NULL, NULL);
-	size_t i, a= 3;
+	stack_init(&s, sizeof(ind_t), 4, NULL, NULL);
+	ind_t i, a= 3;
 	for (i = 0; i < 200; i++)
 		stack_push(&s, &a);
-	size_t b;
+	ind_t b;
 	for (i = 0; i < 200; i++) {
 		stack_pop(&s, &b);
 		printf("%d", b);

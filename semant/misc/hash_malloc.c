@@ -23,7 +23,7 @@ typedef struct {
 //	slots loc;	/* where I stores true elems */
 	int (* hash) (void *, int);	/* this is not a generic hash func prototype,
 					 * coz I use int to do index, the best
-					 * size is size_t, but it suffers '0-1 > 0'
+					 * size is ind_t, but it suffers '0-1 > 0'
 					 * problem. */ 
 } hash_tab;
 

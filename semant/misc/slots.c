@@ -5,7 +5,7 @@
 #include "misc_types.h"
 #include "utils.h"
 static void *page_new(pages *p);
-static int _pages_init(pages *p, size_t page_size)
+static int _pages_init(pages *p, ind_t page_size)
 {
 	stack_init(&p->plist, sizeof(void *), 4, NULL, NULL);
 	p->page_size = page_size;
@@ -14,7 +14,7 @@ static int _pages_init(pages *p, size_t page_size)
 	page_new(p);
 	return 0;
 }
-int pages_init(pages *p, size_t page_size)
+int pages_init(pages *p, ind_t page_size)
 {
 	if (!(page_size >= getpagesize()))
 		return -2;
@@ -63,7 +63,7 @@ int page_dump(pages *p)
 	return 0;
 }
 /* return 0 ~ n-1 page base address */
-void *pages_nth(pages *p, size_t i)
+void *pages_nth(pages *p, ind_t i)
 {
 	return *(void **)stack_nth(&p->plist, i); 
 }
@@ -74,7 +74,7 @@ static int stack_cmp(const void *a, const void *b)
 	return *(char **)a != *(char **)b;
 }
 
-static void  _slots_init(slots *s, size_t esize,
+static void  _slots_init(slots *s, ind_t esize,
 		 void (*func)(void *))
 {
 
@@ -90,7 +90,7 @@ static void  _slots_init(slots *s, size_t esize,
 	stack_init(&s->frags, sizeof(void *), 4, &stack_cmp, NULL);
 }
 
-int slots_init(slots *s, size_t esize,
+int slots_init(slots *s, ind_t esize,
 		 void (*func)(void *))
 {
 	if (MAGIC_PAGE_SIZE <= esize)
@@ -103,8 +103,8 @@ static void clear_page( slots *s, void *base)
 {
 
 	void *addr;
-	size_t limit = s->page_log_len;
-	size_t esize = s->esize;
+	ind_t limit = s->page_log_len;
+	ind_t esize = s->esize;
 
 	while (limit > 0) {
 		limit--;
@@ -125,12 +125,12 @@ void  slots_dispose(slots *s)
 		}
 }
 
-//size_t   slots_length(const slots *s) {return s->log_len;}
+//ind_t   slots_length(const slots *s) {return s->log_len;}
 
-void *slots_nth(slots *s, size_t pos) 
+void *slots_nth(slots *s, ind_t pos) 
 {
 	char *base = (char *)pages_nth(&s->elems, pos / s->elems_per_page);
-	size_t i = (pos % s->elems_per_page);
+	ind_t i = (pos % s->elems_per_page);
 
 	if (base) {
 		return (stack_find(&s->frags, &pos)) ?
@@ -150,7 +150,7 @@ static void slots_grow(slots *s)
 void *slots_insert(slots *s, const void *elemAddr)
 {
 	void *slot;
-	size_t inc = 0;
+	ind_t inc = 0;
 	if (stack_isempty(&s->frags)) {		//use fragments first
 		stack_pop(&s->frags, &slot);
 		inc = 0;
@@ -168,7 +168,7 @@ void *slots_insert(slots *s, const void *elemAddr)
 	return slot;
 }
 
-int slots_replace_safe(slots *s, const void *from, size_t pos)
+int slots_replace_safe(slots *s, const void *from, ind_t pos)
 {
 	void *to = slots_nth(s, pos);
 	if (to != NULL)
@@ -185,9 +185,9 @@ int slots_replace(slots *s, const void *from, void *to)
 		memcpy(to, from, s->esize);
 	return 0;
 }
-size_t slots_getpos(slots *s, void *addr)
+ind_t slots_getpos(slots *s, void *addr)
 {
-	size_t npages = s->elems.n_pages;
+	ind_t npages = s->elems.n_pages;
 	int i, hitted = 0; char *base;
 
 	// check the where the addr is located 
@@ -206,7 +206,7 @@ size_t slots_getpos(slots *s, void *addr)
 		return TOOLARGE;
 }
 
-int slots_delete_safe(slots *s, const size_t pos, void *ret_addr)
+int slots_delete_safe(slots *s, const ind_t pos, void *ret_addr)
 {
 	void *from = slots_nth(s, pos);
 	if (from != NULL) {

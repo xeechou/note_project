@@ -11,7 +11,7 @@
  */
 
 
-void smm_init(smmblk *s, size_t esize, size_t init_alloc, size_t sec_size,
+void smm_init(smmblk *s, ind_t esize, ind_t init_alloc, ind_t sec_size,
 		void (*func) (void *))
 {
 	while ( (s->elems = malloc(init_alloc * esize)) 
@@ -36,7 +36,7 @@ void smm_dispose(smmblk *s)
 	free(s->elems);
 }
 
-static void smm_grow(smmblk *s, size_t size)
+static void smm_grow(smmblk *s, ind_t size)
 {
 	do {
 		s->alloc_len *= 2;
@@ -46,9 +46,9 @@ static void smm_grow(smmblk *s, size_t size)
 	assert(s->elems);
 }
 
-void smm_append(smmblk *s, void *elem_addr, void **ret_addr, size_t num)
+void smm_append(smmblk *s, void *elem_addr, void **ret_addr, ind_t num)
 {
-	size_t size = s->log_len + num;
+	ind_t size = s->log_len + num;
 	if (size >= s->alloc_len)
 		smm_grow(s, size);
 	*ret_addr = (char *)s->elems + s->esize * s->log_len;
@@ -57,7 +57,7 @@ void smm_append(smmblk *s, void *elem_addr, void **ret_addr, size_t num)
 }
 
 /* move pointer backwards, return address, copy it if you need */
-void smm_delete(smmblk *s, void **ret_addr, size_t num)
+void smm_delete(smmblk *s, void **ret_addr, ind_t num)
 {
 	assert(num <= s->log_len);
 	s->log_len -= num;
@@ -65,7 +65,7 @@ void smm_delete(smmblk *s, void **ret_addr, size_t num)
 }
 /* just like smm_delete, only it copy data for you, so you need prepare memory
  * for it.*/
-void smm_pop(smmblk *s, void *ret_addr, size_t num)
+void smm_pop(smmblk *s, void *ret_addr, ind_t num)
 {
 	assert(num <= s->log_len);
 	s->log_len -= num;

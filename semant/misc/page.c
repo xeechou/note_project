@@ -3,7 +3,7 @@
 void *memcpy(void *dest, const void *src, size_t n);
 
 
-static int pstrt_init(page_strt *p, size_t esize, size_t page_size, 
+static int pstrt_init(page_strt *p, ind_t esize, ind_t page_size, 
 		void (* cp) (void *, const void *))
 {
 	int err = 0;
@@ -23,7 +23,7 @@ static int pstrt_init(page_strt *p, size_t esize, size_t page_size,
 	p->cp = cp;
 	return err;
 }
-int err_pstrt_init(page_strt *p, size_t esize, size_t page_size,
+int err_pstrt_init(page_strt *p, ind_t esize, ind_t page_size,
 		void (* cp) (void *, const void *))
 {
 	if ( (esize > 0 && page_size > 0) == 0)
@@ -57,7 +57,7 @@ static int page_new(page_strt *p)
 }
 int pstrt_insert(page_strt *p,  const void *elemAddr, void **ret_addr)
 {
-	size_t err = 0, inc = 0;
+	ind_t err = 0, inc = 0;
 	void *addr;
 	if (stack_isempty(&p->frags)) {
 		stack_pop(&p->frags, &addr);

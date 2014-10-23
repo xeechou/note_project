@@ -5,8 +5,8 @@
 #include "misc_types.h"
 
 
-void lht_init(lhash_tab *lht, size_t esize, size_t init_alloc, 
-		unsigned long (*hash) (void *, size_t), 
+void lht_init(lhash_tab *lht, ind_t esize, ind_t init_alloc, 
+		unsigned long (*hash) (void *, ind_t), 
 		int (*cmp)  (const void *, const void *),
 		void (*func) (void *))
 {
@@ -44,13 +44,13 @@ static void lht_remap(lhash_tab *lht, lhash_elem **tab, slots *new_slots)
 {
 	lhash_elem *symbol;
 	int i;
-	size_t h;
+	ind_t h;
 	for (i = 0; i < lht->log_len; i++) {
 		while (lht->table[i] != NULL) {
 			symbol = lht->table[i];
 			lht->table[i] = symbol->next; 	//unhook
 
-			h = (size_t) lht->hash((void *)&symbol->data, lht->alloc_len);
+			h = (ind_t) lht->hash((void *)&symbol->data, lht->alloc_len);
 			symbol->next = tab[h];
 
 			tab[h] = (lhash_elem *)slots_insert(new_slots, 
@@ -80,7 +80,7 @@ void *lht_lookup(lhash_tab *lht, void *elem_addr, int create)
 		lht_grow(lht);
 	// find
 	lhash_elem *symbol;
-	size_t h = (size_t) lht->hash(elem_addr, lht->alloc_len);
+	ind_t h = (ind_t) lht->hash(elem_addr, lht->alloc_len);
 	symbol = lht->table[h];
 
 	while(symbol != NULL) {
@@ -107,7 +107,7 @@ void lht_delete(lhash_tab *lht, void *elem_addr)
 	assert(lht->log_len > 0);
 
 	lhash_elem *symbol, *trash;
-	size_t h =(size_t) lht->hash(elem_addr, lht->alloc_len);
+	ind_t h =(ind_t) lht->hash(elem_addr, lht->alloc_len);
 	symbol = lht->table[h];
 	while(symbol != NULL) {
 		if (lht->cmp((void *)&symbol->data, elem_addr) == 0) {
@@ -126,7 +126,7 @@ void lht_delete(lhash_tab *lht, void *elem_addr)
  eh, my hash function will be .... 
  */
 /*
-unsigned long silly_hash(void *d, size_t len)
+unsigned long silly_hash(void *d, ind_t len)
 {
 	unsigned long a = (unsigned long)-1 >> 1;
 	return ((*(unsigned long *)d) & a) % len;

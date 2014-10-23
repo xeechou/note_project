@@ -18,10 +18,10 @@
 
 
 void 
-oht_init(ohash_tab *oht, size_t esize, size_t init_alloc, 
-		size_t (*hash) (void *, size_t), 
+oht_init(ohash_tab *oht, ind_t esize, ind_t init_alloc, 
+		ind_t (*hash) (void *, ind_t), 
 		int (*cmp) (const void *, const void *),
-		int (*check) (void *, int, size_t),
+		int (*check) (void *, int, ind_t),
 		void (*cp) (void *, void *))
 {
 	oht->table = malloc(2 * init_alloc * esize);
@@ -44,7 +44,7 @@ void oht_dispose(ohash_tab *oht)
 	free(oht->table);
 }
 /* now the open_addressing function will not return a null value */
-static int open_addressing(const ohash_tab *oht, void *elem_addr, size_t h,
+static int open_addressing(const ohash_tab *oht, void *elem_addr, ind_t h,
 				void **symbol)
 {
 	*symbol = (char *)oht->table + oht->esize * h;
@@ -83,7 +83,7 @@ static void oht_grow(ohash_tab *oht)
 
 	newht.table = new_tab;
 	
-	size_t i;
+	ind_t i;
 	void *symbol;
 	int chk;
 	//remap
@@ -109,7 +109,7 @@ int oht_lookup(ohash_tab *oht, void *elem_addr, void **ret_addr,
 	assert(*ret_addr != elem_addr);
 	if (oht->log_len * 2 >= oht->alloc_len )
 		oht_grow(oht);
-	size_t h = (size_t) oht->hash(elem_addr, oht->alloc_len);
+	ind_t h = (ind_t) oht->hash(elem_addr, oht->alloc_len);
 	
 	int chk = open_addressing(oht, elem_addr, h, ret_addr);
 	if (chk == OHT_OTHER)
@@ -130,7 +130,7 @@ int oht_lookup(ohash_tab *oht, void *elem_addr, void **ret_addr,
 void oht_delete(ohash_tab *oht, void *elem_addr)
 {
 	assert(oht->log_len > 0);
-	size_t h = (size_t) oht->hash(elem_addr, oht->alloc_len);
+	ind_t h = (ind_t) oht->hash(elem_addr, oht->alloc_len);
 	void *symbol; 
 	int chk = open_addressing(oht, elem_addr, h, &symbol);
 	if (chk == OHT_OTHER) {
@@ -139,7 +139,7 @@ void oht_delete(ohash_tab *oht, void *elem_addr)
 	}//else do nothing
 }
 /*
-unsigned long silly_hash(void *d, size_t len)
+unsigned long silly_hash(void *d, ind_t len)
 {
 	unsigned long a = (unsigned long)-1 >> 1;
 	return ((*(unsigned long *)d) & a) % len;
@@ -150,11 +150,11 @@ static int stack_cmp(const void *a, const void *b)
 	return *(int *)a != *(int *)b;
 }
 
-int silly_check(void *item, int chk_val, size_t how_many)
+int silly_check(void *item, int chk_val, ind_t how_many)
 {
 	static int magic_val_init = 2147483647;
 	static int magic_val_deleted = 2147483646;
-	size_t i;
+	ind_t i;
 	int  chk_rel = OHT_OTHER;
 	int *elem = (int *)item;
 	for (i = 0; i < how_many; i++) {

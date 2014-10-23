@@ -1,0 +1,51 @@
+topic type_check {
+	kpt 'type check' : {
+		jobs := {
+			"All identifiers are declared.";
+			"Types.";
+			"inheritance relationships.";
+			"identifiers defined only once.";
+			"others...";
+		};
+		process := {
+		"type inference : deduce the type of one identifier";
+		"type checking : check if operation of identifiers is allowed";
+		};
+	}
+
+	kpt scope : {
+		what := "scope of a identifier is the portion of "
+			"program that the identifier is accesible.";
+		'where introduced scope' :=
+		{
+		"global.";
+		"class declaration.";
+		"Method definition.";
+		"Let expression.";
+		"Formal parameters.";
+		"else...";
+		}
+	}
+	kpt 'symbol table' : {
+		what := "the data struture to manage scope.";
+		api := {
+			"enter_scope()		start a new nest scope";
+			"find_symbol()		find current x(or null)";
+			"add_symbol(x)		add a symbol x to the table";
+			"check_symbol(x) 	make sure x is declared.";
+			"exit(scope)		exit current scope";
+		};
+	}
+
+	kpt type : {
+		kinds := {
+		'statically typed';
+		'dynamically typed';
+		"untyped";
+		};
+	}
+	kpt 'statically typed' := "type check done in compilation";
+	kpt 'dynamically typed' := "type chekc done in program excution";
+
+	
+}

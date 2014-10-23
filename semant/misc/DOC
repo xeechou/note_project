@@ -1,0 +1,5 @@
+* Todo, using xmalloc functions to replace malloc itself.
+
+* How to use slot: you better not store related data in slots coz they will
+* when slot grows, all the address will become invalid, but since slots is a
+* table, the order never changes, which allows you to index the table.

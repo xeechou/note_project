@@ -4,7 +4,7 @@
 
 #include "misc_types.h"
 #include "utils.h"
-void stack_init(stack *s, ind_t esize,  ind_t init_alloc, 
+void stack_init(stack *s, size_t esize,  ind_t init_alloc, 
 		int (*cmp) (const void *, const void *),
 		void (*func)(void *))
 {
@@ -54,13 +54,10 @@ static void stack_grow(stack *s)
 }
 
 int stack_isempty(stack *s) { return s->log_len; };
-void stack_top(stack *s, void **ret_addr)
+void *stack_top(stack *s)
 {
-	if (s->log_len == 0)
-		*ret_addr = NULL;
-	else 
-		*ret_addr = (char *)s->elems +
-			(s->log_len - 1) * s->esize;
+	return (s->log_len == 0) ? NULL :
+		(char *)s->elems + (s->log_len - 1) * s->esize;
 }
 void stack_pop(stack *s, void *ret_addr)
 {

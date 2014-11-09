@@ -143,9 +143,11 @@ typedef struct SNAILState {
 	symbol_tab id_table;
 	symbol_tab str_table;
 	symbol_tab str_psr_tab;
-	page_strt nodes_data;
-	page_strt ast_nodes;
+	slots nodes_data;
+	slots ast_nodes;
 
+
+	/* flags */
 
 	ast_node *ast_root;
 } SNAILState;

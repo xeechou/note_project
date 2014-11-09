@@ -9,39 +9,55 @@ static symbol *curr_kpt;
 static symbol *curr_func;
 static symbol *curr_attr;
 
+/* current policy is that we store whole type_env struct in stack,
+ * it may not be a good choice, but this way we are safe
+ */
+
 void scope_init(scope *s)
 {
 	stack_init(&s->env_stack, sizeof(type_env), 4, NULL, NULL);
 
-	err_pstrt_init(&s->items, sizeof(scope_item), 8192, NULL);
+	slots_init(&s->items, sizeof(scope_item), NULL);
 }
 
 void scope_enter(scope *s, type_env *newenv)
 {
 	newenv->len = 0;
 	newenv->head = NULL;
-	stack_top(&s->env_stack, &newenv->parent);
+	newenv->parent = stack_top(&s->env_stack);
 
 	stack_push(&s->env_stack, (void *)newenv);
 }
+void scope_rm_item(scope *s, type_env *env, scope_item *last, scope_item *here)
+{
+	last->next = here->next;
+	slots_delete(&s->items, here);
+	env->len--;
+}
+
+/*stack pop will cp the value to you, rather than set the pointer value
+ * this is the new policy
+ */
 void scope_exit(scope *s)
 {
-	void *trash;
-	scope_item *head = (s->env_stack).head;
+	type_env trash;
+	stack_pop(&s->env_stack, &trash);
+	scope_item *head = ((type_env )trash).head;
 	//delete all the items in the env
 	while (head) {
 		scope_item *i = head->next;
-		pstrt_delete(&s->items, head);
+		slots_delete(&s->items, head);
 		head = i;
 	}
-	stack_pop(&s->env_stack, &trash);
 }
 
-/* insert at end of link to make process faster */
+/* insert an new item in current type_env. Since order is irrelevant, we just
+ * insert items reversely, which we can avoid a branch decision
+ */
 scope_item *scope_add_item(scope *s, type_env *cur_env, scope_item *item)
 {
 	item->next = cur_env->head;
-	pstrt_insert(&s->items, item, (void **)&cur_env->head);
+	slots_insert(&s->items, item);
 	cur_env->len += 1;
 	return cur_env->head;
 }
@@ -66,8 +82,31 @@ scope_item *scope_op_item(type_env *env, symbol *a, int opt)
 	else
 		return NULL;
 }
+/* test functions!!! */
 
-/*XXX:*** test use data *****/
+/* first, simple test */
+int main()
+{
+	scope s;
+	scope_init(&s);
+	type_env env[10];
+	//TODO: adding new items in
+	
+	int i;
+	for (i = 0; i < 10; i++) {
+		scope_enter(&s, &env[i]);
+		printf("enter new env %d!!!\n", i);
+	}
+	for (i = 0; i < 10; i++) {
+		scope_exit(&s);
+		printf("exit env!");
+	}
+	if (stack_top(&s.env_stack) != NULL)
+		printf("god damn it!\n");
+
+}
+
+#ifdef COMPLETE
 static ohash_tab global_tab;
 
 
@@ -77,8 +116,8 @@ static ohash_tab global_tab;
  ************************* */
 /*assume ht has been initialized */
 /* don't check TOPIC repeatation, SNAIL allows that */
-static page_strt *ast_nodes;
-static page_strt *nodes_data;
+static slots *ast_nodes;
+static slots *nodes_data;
 static inline int assert_data(node_data *n, int type)
 {
 	return (n->type == type) ? 1 : 0;
@@ -299,3 +338,4 @@ static global *prepare_proc(ohash_tab *ht, ast_node *proc)
 				sym_genstr(g.feature));
 	return ret;
 }
+#endif

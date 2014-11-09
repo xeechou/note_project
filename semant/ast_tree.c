@@ -1,9 +1,13 @@
 #include "ast_tree.h"
+#include <assert.h>
 //#include <stdarg.h> since function is defined in header files, the head file
 //must include <stdarg.h>
 #include "misc/misc_types.h"
 
-static void del_node_data(node_data *to_del, page_strt *p);
+//static ast_node trash_ast;
+//static node_data trash_node;
+
+static void del_node_data(node_data *to_del, slots *s);
 extern int curr_lineno;			// a notorious global we have :p
 static inline void info_debug(debug_info *info, int type, int (*func)(int, ast_node *))
 {
@@ -14,7 +18,7 @@ static inline void info_debug(debug_info *info, int type, int (*func)(int, ast_n
 /* generate one line in syntax tree */
 ast_node *syntax_line(char *start, char *end, 
 		      	int type, node_data *items,
-			unsigned int n_nodes, page_strt *p)
+			unsigned int n_nodes, slots *s)
 {
 	ast_node n, *ret;
 	info_debug(&n.info, type, dump_type); //the first function we added in will add all the
@@ -25,10 +29,11 @@ ast_node *syntax_line(char *start, char *end,
 	n.items = items;
 	n.n_nodes = n_nodes;
 
-	pstrt_insert(p, &n, (void **)&ret);
+	ret = slots_insert(s, &n);
+	assert(ret);
 	return ret;
 }
-void rm_ast_node(ast_node *an, node_data *head, page_strt *p)
+void rm_ast_node(ast_node *an, node_data *head, slots *s)
 {
 	ast_node *prev = an->prev, *next = an->next;
 	if (prev == next)	//case one: only one node in the list
@@ -37,11 +42,11 @@ void rm_ast_node(ast_node *an, node_data *head, page_strt *p)
 		head->n = next;
 	prev->next = next;
 	next->prev = prev;
-	pstrt_delete(p, an);
+	slots_delete(s, an);
 }
 /* we tries to delete a node_data n from a list, check if n is the first
  * node of ast_node */
-void rm_node_data(node_data *n, node_data **pos, page_strt *p)
+void rm_node_data(node_data *n, node_data **pos, slots *s)
 /* this funtion assumes that only restraint now is head problem */
 {
 	node_data *d = *pos;
@@ -49,20 +54,21 @@ void rm_node_data(node_data *n, node_data **pos, page_strt *p)
 		*pos == NULL;
 	else if (n == d)  		//Oops, first node
 		*pos = n->next; 
-	del_node_data(n, p);		//delete it anyway
+	del_node_data(n, s);		//delete it anyway
 	return;
 }
 
-void clear_node_data(ast_node *n, page_strt *p)
+/* rm all nodes in ast_node n */
+void clear_node_data(ast_node *n, slots *s)
 {
 	node_data *to_del = n->items;
 	
 	while (to_del->next != n->items) {
 		node_data *entry = to_del;
 		to_del->next = to_del->next->next;
-		del_node_data(entry, p);
+		del_node_data(entry, s);
 	}
-	del_node_data(to_del, p);
+	del_node_data(to_del, s);
 	n->items = NULL;
 }
 
@@ -122,13 +128,13 @@ node_data *append_node_data(int num, node_data *first, ...)
 	return first;
 }
 
-static void del_node_data(node_data *to_del, page_strt *p)
+static void del_node_data(node_data *to_del, slots *s)
 {
 	node_data *prev = to_del->prev;
 	node_data *next = to_del->next;
 	prev->next = next;
 	next->prev = prev;
-	pstrt_delete(p, to_del);
+	slots_delete(s, to_del);
 }
 /* To ensure n is not to large, 
  * this function has to be invoked by ast_node related function */
@@ -147,36 +153,36 @@ node_data *n_node(ast_node *a, unsigned int n)
 }
 
 /****************** primitive type specific function ******************/
-node_data *data_sym(symbol *sym, page_strt *p)
+node_data *data_sym(symbol *sym, slots *s)
 {
 	node_data d, *ret;
 	d.sym = sym;
 	d.type = NT_SYM;
-	pstrt_insert(p, &d, (void **)&ret);
+	ret = slots_insert(s, &d);
 	return ret;
 }
 
-node_data *data_int(int i, page_strt *p)
+node_data *data_int(int i, slots *s)
 {
 	node_data d, *ret;
 	d.i = i;
 	d.type = NT_INT;
-	pstrt_insert(p, &d, (void **)&ret);
+	ret = slots_insert(s, &d);
 	return ret;
 }
 
-node_data *data_node(ast_node *n, page_strt *p)
+node_data *data_node(ast_node *n, slots *s)
 {
 	node_data d, *ret;
 	d.n = n;
 	d.type = NT_NODE;
-	pstrt_insert(p, &d, (void **)&ret);
+	ret = slots_insert(s, &d);
 	return ret;
 }
 /* test region */
 /*
-static page_strt nodes_data;
-static page_strt ast_nodes;
+static slots nodes_data;
+static slots ast_nodes;
 static char *start = NULL;
 static char *end = NULL;
 #include <stdio.h>
@@ -184,8 +190,8 @@ int curr_lineno;
 FILE *stream;
 int main(void) {
 	stream = stdin;
-	err_pstrt_init(&nodes_data, sizeof(node_data), 4096, NULL);
-	err_pstrt_init(&ast_nodes, sizeof(ast_node), 4096, NULL);
+	slots_init(&nodes_data, sizeof(node_data),  NULL);
+	slots_init(&ast_nodes, sizeof(ast_node),  NULL);
 	ast_node *b = syntax_line(start, end, 1, NULL, 0, &ast_nodes);
 
 	node_data *nd = compose_node_data(4, 
@@ -197,7 +203,7 @@ int main(void) {
 	unsigned int i;
 
 	for (i = 0; i < 3; i++) {
-		int c = n_node_data(a, i)->i;
+		int c = n_node(a, i)->i;
 		printf("%d\n", c);
 	}
 	return 0;

@@ -7,14 +7,14 @@ typedef unsigned long ind_t;
 /***************************** stack begin ***********************************/
 typedef struct {
 	void *elems;
-	ind_t esize;
+	size_t esize;
 	ind_t log_len; 
 	ind_t alloc_len;
 	/* the user should know the size they compare */
 	int (*cmp) (const void *, const void *);
 	void (*func) (void *);
 } stack;
-void stack_init(stack *s, ind_t esize,  ind_t init_alloc, 
+void stack_init(stack *s, size_t esize,  ind_t init_alloc, 
 		int (*cmp) (const void *, const void *),
 		void (*func)(void *));
 
@@ -27,6 +27,7 @@ int stack_isempty(stack *s);
 void stack_pop(stack *s, void *ret_addr);
 
 void stack_push(stack *s, const void *elem_addr);
+void *stack_top(stack *s);
 
 /* return 0 to n-1 elems in the stack */
 void *stack_nth(stack *s, ind_t i);
@@ -36,16 +37,17 @@ void *stack_nth(stack *s, ind_t i);
 
 /****************************** page start ************************************/ 
 typedef struct {
-	ind_t page_size;
+	size_t page_size;
 	ind_t n_pages;
 	void *curr_page;
 
 	stack plist;	//array that for store page addresses;
 } pages;
 
-int pages_init(pages *p, ind_t page_size);
+int pages_init(pages *p, size_t page_size);
 void pages_dispose(pages *p);
 int page_dump(pages *p);
+/* 0 ~ n-1 */
 void *pages_nth(pages *p, ind_t i);
 /****************************** page end  ************************************/ 
 
@@ -56,7 +58,7 @@ typedef struct {
 	ind_t log_len;		//the log_len is the global log_len, not single_page
 	ind_t page_log_len;
 	unsigned long elems_per_page;
-	ind_t esize;
+	size_t esize;
 	void (*func) (void *);
 
 	pages elems;
@@ -66,7 +68,7 @@ typedef struct {
 #define TOOLARGE	0xffffffff
 
 
-int slots_init(slots *s, ind_t esize,
+int slots_init(slots *s, size_t esize,
 		 void (*func)(void *));
 void  slots_dispose(slots *s);
 
@@ -80,23 +82,23 @@ void *slots_insert(slots *s, const void *elemAddr);
 int slots_replace_safe(slots *s, const void *from, ind_t pos);
 int slots_replace(slots *s, const void *from, void *to);
 
-int   slots_delete_safe(slots *s, const ind_t pos, void *ret_addr);
-void  slots_delete(slots *s, void *todel, void *ret_addr);
-void  slots_pop(slots *s, void *ret_addr);
+int   slots_delete_safe(slots *s, const ind_t pos);
+void  slots_delete(slots *s, void *todel);
+void  slots_pop(slots *s);
 
 /***************************** slots end *************************************/ 
 /**************************** smmblk begin ************************************/
 
 typedef struct {
 	void *elems;
-	ind_t esize;
+	size_t esize;
 	ind_t log_len;
 	ind_t alloc_len;
 	ind_t sec_size;		//secured size
 	void (*func) (void *);
 } smmblk;
 typedef ind_t smm_t;
-void smm_init(smmblk *s, ind_t esize, ind_t init_alloc, ind_t sec_size,
+void smm_init(smmblk *s, size_t esize, ind_t init_alloc, ind_t sec_size,
 		void (*func) (void *));
 #define smm_nth(s, index) \
 	(void *)((char *)(s->elems) + s->esize * index)
@@ -120,16 +122,16 @@ typedef volatile struct lhash_elem {
 
 typedef struct {
 	lhash_elem *(*table);	/* lhash_elem *table[] */
-	ind_t esize;		/* the true data size */
-	ind_t hesize;		/* hash elem's size */
+	size_t esize;		/* the true data size */
+	size_t hesize;		/* hash elem's size */
 	ind_t log_len;
 	ind_t alloc_len;
 	slots loc;	/* where I stores true elems */
 	int (* cmp) (const void *, const void *);
-	unsigned long (* hash) (void *, ind_t);
+	unsigned long (* hash) (void *, size_t);
 } lhash_tab;
 
-void lht_init(lhash_tab *lht, ind_t esize, ind_t init_alloc, 
+void lht_init(lhash_tab *lht, size_t esize, ind_t init_alloc, 
 		ind_t (*hash) (void *, ind_t), 
 		int (*cmp) (const void *, const void *),
 		void (*func) (void *));
@@ -149,7 +151,7 @@ void lht_delete(lhash_tab *lht, void *elem_addr);
 
 typedef struct {
 	void *table;
-	ind_t esize;
+	size_t esize;
 	ind_t log_len;
 	ind_t alloc_len;
 	int (*cmp) (const void *, const void *);
@@ -160,8 +162,8 @@ typedef struct {
 } ohash_tab;
 
 void 
-oht_init(ohash_tab *oht, ind_t esize, ind_t init_alloc, 
-		ind_t (*hash) (void *, ind_t), 
+oht_init(ohash_tab *oht, size_t esize, ind_t init_alloc, 
+		ind_t (*hash) (void *, size_t), 
 		int (*cmp) (const void *, const void *),
 		int (*check) (void *, int, ind_t),
 		void (*cp) (void *, void *));
@@ -187,9 +189,9 @@ typedef struct {
 	ind_t log_len;
 
 	unsigned long elems_per_page;
-	ind_t esize;
+	size_t esize;
 
-	ind_t page_size;
+	size_t page_size;
 	ind_t n_pages;
 	void *curr_page;
 
@@ -198,7 +200,7 @@ typedef struct {
 	void (* cp)(void *, const void *);
 } page_strt;
 
-int err_pstrt_init(page_strt *p, ind_t esize, ind_t page_size,
+int pstrt_init(page_strt *p, size_t esize, ind_t page_size,
 		void (* cp) (void *, const void *));
 
 
